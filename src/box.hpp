@@ -126,56 +126,7 @@ public:
   	void Init()
   	{
   	
-  	  //3.0 Check if global NewSession was called.
-  	  if(!gl::session_declared)
-  	  {
-  	  	std::cerr << "[FATAL ERROR] NewSession() was not called before of LangevinBox().\n";
-  	  	exit(-1);
-  	  }
-
-      
-      //3.1 BoxPath Creation ////// TODO → Mutax Protect
-  	  gl::boxcounter++;
-  	  this->BoxID = gl::boxcounter; //Set BoxID
-
-
-  	  //Assumes → gl::session_path is guarenteed to be a valid path.
-
-  	 if(this->BoxID == 0 && gl::boxmode == "singlebox")
-  	  {
-  	  	//No Subfolder is created
-  	  	this->box_path = gl::session_path;
-        
-        this->raw_path = box_path; raw_path.append("Raw/");
-        mkdir(raw_path.c_str(), 0777);
-  	  }
-
-  	  else if(this->BoxID > 1 && gl::boxmode == "singlebox")
-  	  {
-  	  	//Invalid State
-  	  	std::cerr << "[ERROR] New box cannot be created in \"singlebox\" mode.\n Set up session with \"multibox\" mode.\n";
-  	  	exit(-1);
-  	  }
-
-
-  	  else if(gl::boxmode == "multibox")
-  	  {
-  	  	//Create Subfolder
-  	  	std::string path = gl::session_path;
-  	  	
-  	  	path.append(std::to_string(BoxID));
-  	  	FileSystem::SlashIt(path);
-  	  	this->box_path = path;
-
-  	  	//Make Subfolder
-  	  	mkdir(path.c_str(), 0777);
-
-        this->raw_path = box_path; raw_path.append("Raw/");
-        mkdir(raw_path.c_str(), 0777);
-  	  }
-
-  	  else
-  	  	std::cerr << "[FATAL ERROR] Invalid State:" << __LINE__ << __FILE__ << '\n';
+      SetSession();
   	
 
 
@@ -256,15 +207,11 @@ public:
 	    std::cout << this->profile_str << std::flush;
     ////////////////////////////////////////////////
 
-  	//3.6. Write Config
-  	JsonConfigWrite(box_path);
+    	//3.6. Write Config
+    	JsonConfigWrite(box_path);
 
-
-
-    //3.7. Write 0th position frame
-    WritePosFrame(partlist, 0);
-
-
+      //3.7. Write 0th position frame
+      WritePosFrame(partlist, 0);
   	} //End of Init()
 
 
@@ -301,7 +248,7 @@ public:
     void Evolve() //Do Evolution of Box
     {
       
-      TimerHD simulation("Simulation");
+      TimerHD time_simulation("Simulation");
 
       //6.1 Calculate loop partitions
       const unsigned long int outerloop =  (FrameExports > 0)*FrameExports + (FrameExports == 0)*1;
@@ -394,28 +341,22 @@ public:
 
       } //End of Outer Evolution Loop
 
-    simulation.Stop(); //End TimerHD - simulation
+    time_simulation.Stop(); //End TimerHD - simulation
 
     // END of SIMULATION LOOP - Out Calculations ↓ [--------] 
 
       //Flush Data Pipes
       datapipe.Flush(box_path);
 
-      TimerHD plotting("Plotting");
+      
       //Run Python Script
       if(gl::run_python)
       {
-      	
+        Launch_Python_Analysis();
         
-        //Launch python script TODO --> use a cleaner approach
-      	std::ostringstream command;
-      	command << "python3  ./python/Plots2.py" << "  " //-----> Script Name
-      			    << this->box_path << "  " //----------> Box Path
-      	        << "C++";  //-------------------------> Operation Mode
-      	int c_return = system(command.str().c_str());
       }
       
-      plotting.Stop(); //Destroy object
+      
 
     } //End of Evolve()
 
@@ -587,6 +528,76 @@ public:
     } //End of profile()
 
 
+    void SetSession()
+    {
+          //3.0 Check if global NewSession was called.
+          if(!gl::session_declared)
+          {
+            std::cerr << "[FATAL ERROR] NewSession() was not called before of LangevinBox().\n";
+            exit(-1);
+          }
+
+          
+          //3.1 BoxPath Creation ////// TODO → Mutax Protect
+          gl::boxcounter++;
+          this->BoxID = gl::boxcounter; //Set BoxID
+
+
+          //Assumes → gl::session_path is guarenteed to be a valid path.
+
+         if(this->BoxID == 0 && gl::boxmode == "singlebox")
+          {
+            //No Subfolder is created
+            this->box_path = gl::session_path;
+            
+            this->raw_path = box_path; raw_path.append("Raw/");
+            mkdir(raw_path.c_str(), 0777);
+          }
+
+          else if(this->BoxID > 1 && gl::boxmode == "singlebox")
+          {
+            //Invalid State
+            std::cerr << "[ERROR] New box cannot be created in \"singlebox\" mode.\n Set up session with \"multibox\" mode.\n";
+            exit(-1);
+          }
+
+
+          else if(gl::boxmode == "multibox")
+          {
+            //Create Subfolder
+            std::string path = gl::session_path;
+            
+            path.append(std::to_string(BoxID));
+            FileSystem::SlashIt(path);
+            this->box_path = path;
+
+            //Make Subfolder
+            mkdir(path.c_str(), 0777);
+
+            this->raw_path = box_path; raw_path.append("Raw/");
+            mkdir(raw_path.c_str(), 0777);
+          }
+
+          else
+            std::cerr << "[FATAL ERROR] Invalid State:" << __LINE__ << __FILE__ << '\n';
+        } //End of SetSession()
+
+
+    void Launch_Python_Analysis()
+    {
+        TimerHD time_for_plotting("Plotting");
+        
+        
+        std::ostringstream command;
+        command << "python3  ./src/python/analysis.py" << "  " //-----> Script Name
+                << this->box_path << "  " //----------> Box Path
+                << "C++";  //-------------------------> Operation Mode
+        int sys_return = system(command.str().c_str());
+
+        time_for_plotting.Stop(); //Destroy object
+    } //End of Launch_Python_Analysis()
+
+    
 }; //End of class LangevinBox[]
 
 //Concepts ↓

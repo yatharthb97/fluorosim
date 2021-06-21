@@ -61,3 +61,7 @@ int main()
 }
 
 
+double AiryUnit(double wavelength, double NA, double magnification)
+{
+	return 1.22 * wavelength * magnification / NA;
+}

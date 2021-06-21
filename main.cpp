@@ -14,7 +14,7 @@ int main()
 	NewSession("Test", "singlebox");
 
 	//2. Create Simulation Clock Object → SimClock(MaxSteps, Step_Size)
-	SimClock simclock(1e6, 1e-3);
+	SimClock simclock(1e5, 1e-3);
 
 	//3. Create Laser Object → (pulse interval, char, decy time)
 	Laser laser("always-on"); //Pulse Every 10 dt, char decay time is 5 dt

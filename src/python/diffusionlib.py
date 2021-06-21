@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+# THIS FILE is a work in progress. It is currently unused.
 
 import math
 import numpy

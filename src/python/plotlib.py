@@ -3,29 +3,33 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-#TODO → Clean
 import sys
 import os
+
 import matplotlib.pyplot as plt
-import numpy as np
+
 from matplotlib.ticker import LogLocator
 from matplotlib import animation
 from mpl_toolkits import mplot3d
 
+import numpy as np
+import math
 import statsmodels.api as sm
+
 from scipy.optimize import curve_fit
 from scipy.stats import poisson
-import math
+
 import json
 import datetime
 
-from shapes import Ellipsoid 
+
+from shapes import Ellipsoid
 
 
 #Grammar → 
 #1. #function_name(*datas, *fn_attributes, param, fit)
 
-#Poisson Histogram Plot
+#Poisson Histogram Plot #unchecked
 def plot_poisson_hist(data, bins, plot_title, param,  exclude_zero=False, fit='fit'):
 
   fig = plt.figure()
@@ -35,6 +39,7 @@ def plot_poisson_hist(data, bins, plot_title, param,  exclude_zero=False, fit='f
   ag = 1
                      #TODO
   if bins > bin_max: #Just control the ticks and not the bins
+    print(f"[WARNING] Posiion Histogram - Max bin size is 20. Defaulting to 20.")
     ag = int(bins/bin_max)
     bins = bin_max
 
@@ -111,7 +116,8 @@ def plot_msd(t, msd, param, log=False, fit='none'):
 
   ax.plot(t, msd, '-',label = 'data')
 
-  msd_fit_deg = 1
+  msd_fit_deg = 1 #TODO
+
   if fit != 'none': #MSD Polynomial fit
     coef = np.polyfit(t, msd, msd_fit_deg) #Fit polynomial
     msd_fit_fn = np.poly1d(coef)
@@ -127,11 +133,12 @@ def plot_msd(t, msd, param, log=False, fit='none'):
         t_saturate = param['Edge'] * 2/(2 * param['dim'] * param['D'])
         print(f"\n• MSD Saturation Estimate: {t_saturate}")
         
+        
         #arrow(x, y, dx, dy, **kwargs) → dx, dy: The length of the arrow along x & y
-        # plt.arrow(t_saturate, 0, 0, msd[int(t_saturate)], 
-        #   head_width = 0.2,
-        #   width = 0.05,
-        #   ec ='green')
+        plt.arrow(t_saturate, 0, t_saturate, msd[int(t_saturate)], 
+                  head_width = 0.2,
+                  width = 0.05,
+                  ec ='green')
 
     #Plot Data
     ax.set_title(f'MSD Plot - Slope → {coef[0]}') #TODO - Restrict Precision
@@ -273,10 +280,22 @@ def plot_taggedpart(sample_size, param):
   ax3d = plt.subplot(projection='3d')
   ax3d.set_title(f"Tagged Particle PID: {int(param['Tagged Part ID'])} - Steps → 0:{sample_size}")
 
-  #Adjust Limits Based on min and max position Components
-  ax3d.set_xlim3d([x.min(), x.max()])
-  ax3d.set_ylim3d([y.min(), y.max()])
-  ax3d.set_zlim3d([z.min(), z.max()])
+  #Adjust Limits Based on min and max position Components → In Isometric Space
+  x_r = [x.min(), x.max()]
+  y_r = [y.min(), y.max()]
+  z_r = [z.min(), z.max()]
+
+  max_all = max(x_r[1] - x_r[0],
+                y_r[1] - y_r[0],
+                z_r[1] - z_r[0])
+
+  medians = [(x_r[1] - x_r[0])/2, (y_r[1] - y_r[0])/2, (z_r[1] - z_r[0])/2]
+  lower_range = [(median[0] - max_all/2), (median[1] - max_all/2), (median[2] - max_all/2)]
+  upper_range = [(median[0] + max_all/2), (median[1] + max_all/2), (median[2] + max_all/2)]
+
+  ax3d.set_xlim3d([lower_range[0], upper_range[0]])
+  ax3d.set_ylim3d([lower_range[1], upper_range[1]])
+  ax3d.set_zlim3d([lower_range[2], upper_range[2]])
 
   ax3d.set_xlabel('X →')
   ax3d.set_ylabel('Y →')
@@ -353,9 +372,9 @@ def pos_plot_animation(param, save_vid=False, psf_alpha=0.25, draw_psf=True):
 
     #5.3 Setting the axes
     if param['Symmetric Box']:
-      ax3d.set_xlim3d([-param['Edge'], param['Edge']])
-      ax3d.set_ylim3d([-param['Edge'], param['Edge']])
-      ax3d.set_zlim3d([-param['Edge'], param['Edge']])
+      ax3d.set_xlim3d([-param['Edge']/2, param['Edge']/2])
+      ax3d.set_ylim3d([-param['Edge']/2, param['Edge']/2])
+      ax3d.set_zlim3d([-param['Edge']/2, param['Edge']/2])
 
     else:
       ax3d.set_xlim3d([0, param['Edge']])
@@ -379,7 +398,7 @@ def pos_plot_animation(param, save_vid=False, psf_alpha=0.25, draw_psf=True):
       # Get Data from file
       file = str(i)
       file += ".dat"
-      filename = os.path.join(param['parent_path'], file);
+      filename = os.path.join(param['raw_path'], file);
       xdata, ydata, zdata, isinvol, isflash  = np.genfromtxt(filename, delimiter = param['D_Sep'], unpack = True)
 
       cdata = isinvol + isflash #Set Colordata
@@ -393,14 +412,22 @@ def pos_plot_animation(param, save_vid=False, psf_alpha=0.25, draw_psf=True):
 
       ax3d.clear()
       ax3d.set_title(f'Position Plot → {str(i)}')
-      #TODO → Reolve for asymmetric box
-      ax3d.set_xlim3d([-param['Edge'], param['Edge']])
+      
+      #Setting the axes
+      if param['Symmetric Box']:
+        ax3d.set_xlim3d([-param['Edge']/2, param['Edge']/2])
+        ax3d.set_ylim3d([-param['Edge']/2, param['Edge']/2])
+        ax3d.set_zlim3d([-param['Edge']/2, param['Edge']/2])
+
+      else:
+        ax3d.set_xlim3d([0, param['Edge']])
+        ax3d.set_ylim3d([0, param['Edge']])
+        ax3d.set_zlim3d([0, param['Edge']])
+
+
+
       ax3d.set_xlabel('X')
-
-      ax3d.set_ylim3d([-param['Edge'], param['Edge']])
       ax3d.set_ylabel('Y')
-
-      ax3d.set_zlim3d([-param['Edge'], param['Edge']])
       ax3d.set_zlabel('Z')
 
       if draw_psf:

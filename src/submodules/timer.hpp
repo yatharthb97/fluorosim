@@ -75,7 +75,7 @@ public:
 		else if (duration > 9999999 & duration <= 99999999 ) std::cout << (double)duration*1.6666666666666666666666666666667e-8 << " min";
 		else  std::cout << (double)duration*2.7777777777777777777778e-10 << " hours";
 		
-		std::cout << "\x1B[37m \n";
+		std::cout << "\x1B[37m" << std::endl;
 	}
 
 
