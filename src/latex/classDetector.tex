@@ -1,0 +1,67 @@
+\hypertarget{classDetector}{}\section{Detector Class Reference}
+\label{classDetector}\index{Detector@{Detector}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classDetector_a0edb82dcfccbde7d8e08db22dd74c60c}\label{classDetector_a0edb82dcfccbde7d8e08db22dd74c60c}} 
+double efficiency \hyperlink{classDetector_a0edb82dcfccbde7d8e08db22dd74c60c}{Detector} (color\+\_\+t color, double efficiency)
+\begin{DoxyCompactList}\small\item\em The constructor. \end{DoxyCompactList}\item 
+bool \hyperlink{classDetector_a51d97a31b186129a7aac2b250352f22e}{detector\+\_\+loss} (double \&rnd)
+\begin{DoxyCompactList}\small\item\em Models the detector loss due to finite efficiency. \end{DoxyCompactList}\item 
+bool \hyperlink{classDetector_aafefda7f530ec8646d1591d7c019d72b}{filter} (\hyperlink{classFluorophore}{Fluorophore} \&f)
+\begin{DoxyCompactList}\small\item\em couples the flourophore with the appropriate color and resets the emit\+\_\+flag. \end{DoxyCompactList}\item 
+bool \hyperlink{classDetector_ae1b633f64a917029a0915c885eebd9a3}{lossy\+\_\+filter} (\hyperlink{classFluorophore}{Fluorophore} \&f, double \&rnd)
+\begin{DoxyCompactList}\small\item\em couples the flourophore with the appropriate color and resets the emit\+\_\+flag and returns if the photon was successfully recorded. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classDetector_a12113b286a0abdf56556712709df81bc}\label{classDetector_a12113b286a0abdf56556712709df81bc}} 
+color\+\_\+t {\bfseries color}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classDetector_a51d97a31b186129a7aac2b250352f22e}\label{classDetector_a51d97a31b186129a7aac2b250352f22e}} 
+\index{Detector@{Detector}!detector\+\_\+loss@{detector\+\_\+loss}}
+\index{detector\+\_\+loss@{detector\+\_\+loss}!Detector@{Detector}}
+\subsubsection{\texorpdfstring{detector\+\_\+loss()}{detector\_loss()}}
+{\footnotesize\ttfamily bool Detector\+::detector\+\_\+loss (\begin{DoxyParamCaption}\item[{double \&}]{rnd }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Models the detector loss due to finite efficiency. 
+
+\begin{DoxyReturn}{Returns}
+boolean value of successful recording of photon 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classDetector_aafefda7f530ec8646d1591d7c019d72b}\label{classDetector_aafefda7f530ec8646d1591d7c019d72b}} 
+\index{Detector@{Detector}!filter@{filter}}
+\index{filter@{filter}!Detector@{Detector}}
+\subsubsection{\texorpdfstring{filter()}{filter()}}
+{\footnotesize\ttfamily bool Detector\+::filter (\begin{DoxyParamCaption}\item[{\hyperlink{classFluorophore}{Fluorophore} \&}]{f }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+couples the flourophore with the appropriate color and resets the emit\+\_\+flag. 
+
+\begin{DoxyReturn}{Returns}
+boolean value of successful coupling 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classDetector_ae1b633f64a917029a0915c885eebd9a3}\label{classDetector_ae1b633f64a917029a0915c885eebd9a3}} 
+\index{Detector@{Detector}!lossy\+\_\+filter@{lossy\+\_\+filter}}
+\index{lossy\+\_\+filter@{lossy\+\_\+filter}!Detector@{Detector}}
+\subsubsection{\texorpdfstring{lossy\+\_\+filter()}{lossy\_filter()}}
+{\footnotesize\ttfamily bool Detector\+::lossy\+\_\+filter (\begin{DoxyParamCaption}\item[{\hyperlink{classFluorophore}{Fluorophore} \&}]{f,  }\item[{double \&}]{rnd }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+couples the flourophore with the appropriate color and resets the emit\+\_\+flag and returns if the photon was successfully recorded. 
+
+\begin{DoxyReturn}{Returns}
+boolean value of successful recording of photon 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+particle2.\+hpp\end{DoxyCompactItemize}

@@ -174,6 +174,7 @@ def plot_acf(acf_x, acf_y, param, polyfit = 0, gauss_fit = True, draw_model=True
   #Fit Functions
   def FitFixedTau(T):
       return 1 / ((1 + (T/TauD))* np.sqrt(1 + (T/TauD)/sf_sq))
+  
   def FitGaussFn(T, a, b):
       return a / ((1 + (T*b))* np.sqrt(1 + (T*b)/sf_sq))
 

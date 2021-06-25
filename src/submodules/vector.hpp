@@ -399,7 +399,7 @@ public:
 
     //22
     //! Multiply corresponding components of a vector.
-    inline V compmul(V &other) const
+    inline V comp_mul(V &other) const
     {
         return V(x*other.x, y*other.y, z*other.z);
     } //End of compmul()
@@ -1025,12 +1025,24 @@ public:
     }
 
 
+    inline void comp_square()
+    {
+        this->x = this->x*this->x;
+        this->y = this->y*this->y;
+        this->z = this->z*this->z;
+    }
 
     //How to represent Infinitesimal Vector?
 
+    inline double accumulate() const
+    {
+        return this->x + this->y + this->z;
+    }
 
-
-
+    inline V square() const
+    {
+        return V(this->x*this->x, this->y*this->y, this->z*this->z)
+    }
 
     //Multi Vector Operations
 

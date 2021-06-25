@@ -13,6 +13,128 @@
 #include "./submodules/filesystem.hpp"
 //#include "./submodules/timer.hpp"
 
+class SimClock
+{
+public:
+
+  double MaxTime;
+  double Brownian_dt;
+  double Photophy_dt;
+
+  ulint_t TotBrownSteps = 0;
+  ulint_t TotPhotSteps = 0;
+
+
+  //Constructor
+  SimClock(double MaxTime, double Brownian_dt, double Photophy_dt) : MaxTime(MaxTime), Brownian_dt(Brownian_dt), Photophy_dt(Photophy_dt)
+  {
+    if(Brownian_dt >= Photophy_dt)
+    {
+      //photophyscics is contained within a brownian move
+      
+    }
+  }
+
+  ///Returns the number for each loop level
+  //Loop_Partition_Fn(3,) //-> Number of Brownian moves within a photophy time
+
+
+
+}; //End of class SimClock
+
+
+
+
+Moves moves;
+Moves::total_moves();
+Moves::per_part();
+
+
+
+class Detector
+{ 
+
+public:
+  
+
+  color_t Color;
+  double Efficiency;
+  ulint_t Photon_count = 0;
+
+  /**
+   * @brief The constructor
+   * */
+  Detector(color_t Color, double Efficiency): Color(Color), Efficiency(Efficiency)
+  {}
+
+  /**
+   * @brief Store the detected ttl pulse
+   * */
+  void inline detect(const unsigned int ttl)
+  {
+    this->Photon_count += ttl;
+  }
+
+  /**
+   * @brief Returns the detector count
+   * */
+  ulint_t inline count() const
+  {
+    return Photon_count;
+  }
+
+  /**
+   * @brief Returns the approximate detector counts missed. Accuracy increases as Photon_count → ∞.
+   * */
+  ulint_t inline approx_missed() const
+  {
+    return Photon_count * (1.0 - Efficiency);
+  }
+
+  /**
+   * @brief Models the detector loss due to finite efficiency
+   * @returns boolean value of successful recording of photon
+   * */
+  bool inline detector_loss(const double &rnd) const
+  {
+    return (rnd <= efficiency);
+  }
+
+  /**
+   * @brief couples the flourophore with the appropriate color and resets the emit_flag.
+   * @returns boolean value of successful coupling
+   * @question → should the filter be non determinsitic (stochastic) in order to allow cross talk ? 
+   * */
+  bool inline filter(Fluorophore &f) const
+  {
+    if(f.color == this->color)
+    {
+      f.emit_flag = false;
+      return true;
+    }
+
+    else
+      return false;
+  }
+
+  /**
+   * @brief couples the flourophore with the appropriate color and resets the emit_flag and returns if the photon was successfully recorded.
+   * @returns boolean value of successful recording of photon
+   * */
+  bool inline lossy_filter(Fluorophore &f, double &rnd)
+  {
+    if(f.color == this->color)
+    {
+      f.emit_flag = false;
+      return (rnd <= efficiency);
+    }
+
+    else
+      return false;
+  }
+
+};
+
 
 
 class Laser
@@ -66,7 +188,7 @@ public:
     }
   } //End of Mode based Constructor
 
-  double Prob(const ulint_t &simcounter) const
+  double prob(const ulint_t &simcounter) const
   {
       if(pulsing)
       {
@@ -100,55 +222,141 @@ public:
 
 }; //End of class Laser
 
-class SimClock
+
+class Veff_Base()
 {
-public:
-
-  ulint_t MaxSteps;
-  double StepSize;
-
-  //Constructor
-  SimClock(ulint_t MaxSteps, double StepSize) : MaxSteps(MaxSteps), StepSize(StepSize)
-  {}
-
-}; //End of class SimClock
+  V bounds() const = 0; //returns the boundaries of the variable
+  geo_t type() const = 0; //returns the "type" of the psf
+  std::string type_str() const = 0; //Type of PSF in String
+  double sf() const = 0; //measure of assymetry along z direction
+  double vol() const = 0; //volume of rough bound enclosure
+  double psf_prob(const &V) const = 0; //returns the intensity profile at the point
+  bool invol(const &V) const = 0; //returns whether the particle is in the effective vol
+};
 
 
-class Veff
+class 3D_Gaussian : public Veff_Base
 {
-public:
-  double radius; //-----------> radius is in reduced units.
-  double radius_sq;//---------> radius squared in reduced units.
-  double sf; //---------------> sf: Structure Factor for z-axis is dimensionless.
-  double vol; //--------------> volume of the PSF saved.
+  public:
 
-  //static std::string type =  "3DGauss-xySymmetric"; //Polymorphic identification ?
+  V exponents;
+  V centre;
+  V boundaries;
+  double norm = 1.0;
 
-  Veff(double radius, double sf) : radius(radius), radius_sq(radius*radius), sf(sf)
-  {}
+  double radius;
+  double radius_sq;
+  double sf;
 
-  Veff(double sf) : sf(sf), radius(0.0)
-  {} // Use with the function below ↓
-
-  double set_real_radius(double &real_radius)
+  3D_Gaussian(double radius, double sf, V centre = V()) : radius(radius), sf(sf), centre(centre), radius_sq(radius*radius)
   {
-      this->radius = real_radius /*/ unit_conversion TODO*/;
+    this->boundaries = V(centre + radius, centre + radius, centre + radius*sf);
+    this->exponents =  V(-2.0/radius_sq, -2.0/radius_sq, -2.0/(radius_sq*sf));
   }
 
-  double vol_gauss()
-  {
-      this->vol = CONST_PI_pow3by2 * radius * radius *  radius * sf;
-      return vol;
 
+  V bounds() const override
+  {
+    return boundaries;
   }
 
-  double vol_sphere()
+  geo_t type() const override
   {
-    this->vol = 4/3*CONST_PI * radius * radius * radius;
-    return vol;
+    return geo_t::Ellipsoid;
   }
 
-}; //End of class Veff
+  std::string type_str() const override
+  {
+    return "3D Gaussian - Ellipsoid";
+  }
+  double sf() const override
+  {
+    return this->sf;
+  }
+
+  double vol() const override
+  {
+    return CONST_PI_pow3by2 * this->radius * this->radius *  this->radius * this->sf;
+  }
+
+  double psf_prob(const &V) const override
+  {
+    V temp = V(pos - this->centre).square;
+    temp = temp.comp_mul(this->exponents);
+    
+    double exponent = exps.accumulate();
+    return this->norm * std::exp(exponent)
+  }
+
+  bool invol(const &V) const override
+  {
+    V temp = V(pos - this->centre);
+    temp.comp_divide(this->boundaries);
+    temp.comp_square(); //Square it
+
+    return (temp.accumulate <= 1.0) || false;
+  }
+
+};
+
+
+class USphere :  public Veff_Base
+{
+  public:
+
+  V exponents;
+  V centre;
+  V boundaries;
+  double norm = 1.0;
+
+  double radius;
+  double radius_sq;
+  double sf;
+
+  USphere(double radius, V centre = V()): radius(radius), radius_sq(radius_sq), centre(centre), boundaries(V(radius, radius, radius))
+  {
+    this->exponents = boundaries.square();
+  }
+
+  V bounds() const override
+  {
+    return boundaries;
+  }
+
+  geo_t type() const override
+  {
+    return geo_t::Sphere;
+  }
+
+  std::string type_str() const override
+  {
+    return "Uniform Sphere";
+  }
+
+  double sf() const override
+  {
+    return 1.0;
+  }
+
+  double vol() const override
+  {
+    return 4/3*CONST_PI * this->radius * this->radius * this->radius;
+  }
+  double psf_prob(const &V pos) const override
+  {
+    return 1.0 * invol(pos) + 0.0;
+  }
+  
+  bool invol(const &V pos) const override
+  {
+    V temp = V(pos - this->centre).square();
+    V temp.comp_divide(exponents);
+
+    return (temp.accumulate() <= radius_sq) || false;
+  }
+
+};
+
 
 //Wrapper for all the stringstream objects → Single Interface
 class Datapipe

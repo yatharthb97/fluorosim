@@ -37,27 +37,7 @@ class Units
   Units()
   {}
 
-  ////Inputs → Sigma, Epsilon, Mass
-  void LJUnits(double Sigma, double Epsilon, double Mass)
-  {
-      
-      this->Sigma = Sigma;
-      this->Epsilon = Epsilon;
-      this->Mass = Mass;
 
-      //Set Epsilon based Attributes
-      setEpsilon(Epsilon); //!!! Temperature is set twice, design choice
-
-      //Gamma Is Unset
-
-      /* USE ↓
-         Units lj;
-         lj.LJUnits(s,e,m)
-         lj.getLJ_TempFactor()
-         lj.getLJ_TDT()
-    
-      */
-  }
   ////Inputs → Sigma, Epsilon, Viscosity
   void setSEV(double Sigma, double Epsilon, double Viscosity)
   {
@@ -73,10 +53,10 @@ class Units
       this->Gamma = 3 * CONST_PI * Viscosity * Sigma;
 
       //Mass is implicitly set
-      this->Mass = realMassFactor()*1.0;
+      this->Mass = rf_mass()*1.0;
 
       //Time is also implicitly set
-      this->Time = realTimeFactor()*1.0;
+      this->Time = rf_time()*1.0;
   }
 
 
@@ -94,10 +74,10 @@ class Units
       this->Gamma = 3 * CONST_PI * Viscosity * Sigma;
 
       //Mass is implicitly set
-      this->Mass = realMassFactor()*1.0;
+      this->Mass = rf_mass()*1.0;
 
       //Time is also implicitly set
-      this->Time = realTimeFactor()*1.0;
+      this->Time = rf_time()*1.0;
   }
 
 
@@ -106,6 +86,7 @@ class Units
     this->KBT = epsilon;
     this->T = epsilon/CONST_Kb;
     this->Beta = 1/KBT;
+    
     this->temp_fixed = false;
   }
 
@@ -114,6 +95,7 @@ class Units
     this->T = newT;
     this->KBT = newT*CONST_Kb;
     this->Beta = 1/KBT;
+    
     this->temp_fixed = true;
   }
   /////////////////////////////////////////////////////////| CONFIG
@@ -123,55 +105,56 @@ class Units
 // Simulation Units Can be multiplied by the return values of the functions given below to get real SI units. ↓ "real" priffix
 
   //Check Again
-  double realBrownianTimeFactor() const//time for a particle to diffuse the square of its diameter
+  double rf_BrownianTime() const
   {
-    return Sigma * Sigma / (6.0 * realDiffusivityFactor()); //(3D form)
+    ///Brownian Time (time for a particle to diffuse the square of its diameter) → sigma*sigma/6*D
+    return Sigma * Sigma / (rf_D()); //(3D form)
   }
   
   //OK
-  double realVolumeFactor() const
+  double rf_volume() const
   {
     return Sigma * Sigma * Sigma;
   } 
 
   //OK
-  double realMassFactor() const
+  double rf_mass() const
   {
     return Gamma * Gamma * Sigma * Sigma * Beta;
   }
 
   //Ok
-  double realTimeFactor() const
+  double rf_time() const
   {
     return Gamma * Sigma * Sigma * Beta;
   }
 
   //OK
-  double realForceFactor() const
+  double rf_force() const
   {
     return KBT/Sigma;
   }
 
   //OK
-  double realViscosityFactor() const
+  double rf_viscosity() const
   {
     return Gamma / Sigma;
   }
 
   //OK
-  double realDiffusivityFactor() const
+  double rf_D() const
   {
     return KBT / Gamma;
   }
 
   //OK
-  double realDiffTSFator() const//Diffusion Time Scale Factor
+  double rf_DiffTimeScale() const//Diffusion Time Scale Factor
   {
     return Sigma * Sigma * Beta;
   }
 
   //For Spherical Particles Only
-  double realMonomerDensityFactor() const
+  double rf_Monomer_MDensity() const
   {
       return realMassFactor() / realVolumeFactor();
   }
@@ -195,29 +178,11 @@ class Units
     buffer << " • Time Step(s) : " << this->Time*dt << '\n';
     buffer << " • Total Simulation Time(s) : " << this->Time * total_steps << "\n\n";
 
-    buffer << " • Mass(kg) : " << this->realMassFactor() << '\n';
-    buffer << " • Force(N) : " << this->realForceFactor() << '\n';
+    buffer << " • Mass(kg) : " << this->rf_mass() << '\n';
+    buffer << " • Force(N) : " << this->rf_force() << '\n';
 
    return buffer.str();
   }
-
-
-/////////////////////////////////////////////////////////| LJ UNITS
-// "get" → Preffix
-
-
-    double getLJ_TDT() //For Lennard Jones System
-    {
-      return Sigma * std::sqrt(Mass / Epsilon);
-    }
-
-
-    //NOK
-    double getLJ_TempFactor() //For Lennard Jones
-    {
-      return KBT / Epsilon;
-    }
-  /////////////////////////////////////////////////////////| LJ UNITS
 
 }; //End of class Units
 
@@ -252,3 +217,45 @@ class Units
 
 
 // In particular, W(t) is almost everywhere discontinuous and has infinite variation. In an intuitive picture, it can be seen as the continuous-time equivalent of a discrete sequence of independent random numbers.
+
+
+
+
+
+/////////////////////////////////////////////////////////| LJ UNITS
+  // "get" → Preffix
+
+    ////Inputs → Sigma, Epsilon, Mass
+    void LJUnits(double Sigma, double Epsilon, double Mass)
+    {
+        
+        this->Sigma = Sigma;
+        this->Epsilon = Epsilon;
+        this->Mass = Mass;
+
+        //Set Epsilon based Attributes
+        setEpsilon(Epsilon); //!!! Temperature is set twice, design choice
+
+        //Gamma Is Unset
+
+        /* USE ↓
+           Units lj;
+           lj.LJUnits(s,e,m)
+           lj.getLJ_TempFactor()
+           lj.getLJ_TDT()
+      
+        */
+    }
+
+    double getLJ_TDT() //For Lennard Jones System
+    {
+      return Sigma * std::sqrt(Mass / Epsilon);
+    }
+
+
+    //NOK
+    double getLJ_TempFactor() //For Lennard Jones
+    {
+      return KBT / Epsilon;
+    }
+/////////////////////////////////////////////////////////| LJ UNITS

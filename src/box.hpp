@@ -216,7 +216,7 @@ public:
 
 
   	//4. Position Initalization Function
-  	double rndPosition() //For Initalization
+  	double rndpos() //For Initalization → returns one rnd coordinate
   	{
   		#if FCS_SYMMETRIC_BOX == 1
   			return Edge*(0.5 - u_dist(rnd.engine)); //Symmetric Box
@@ -227,7 +227,7 @@ public:
   	} //End of rndPosition()
 
   	//5. PBC → Periodic Boundary Conditions Function
-    void PBC(V &pos)
+    void pbc(V &pos)
     {
       
       #if FCS_SYMMETRIC_BOX == 1  //Symmetric Box
@@ -244,15 +244,44 @@ public:
 
 
 
-    //6. Evolve Function → Simulation Function
-    void Evolve() //Do Evolution of Box
+    void add_particle(color_t color, double D, unsigned int N = 1)
     {
       
-      TimerHD time_simulation("Simulation");
+      //VERBOSE("Added N particles with color {color_t_str(color)}, and diffusivity {D}.");
+      for(int i = 0; i < N; i++)
+      {
+        V pos = V::Generate(this->rndpos());
+        partlist.emplace_back(pos, D, color);
+      }
+    } //End of add_particle()
 
+
+    void add_detector(Detector &detector)
+    {
+      //VERBOSE("Added detector with color {color_t_str(detector.channel)}.);
+      detectorlist.emplace_back(detector);
+    }
+
+
+
+
+
+    //6. Evolve Function → Simulation Function
+    void evolve(const Camera &camera, const Simclock &clock) //Do Evolution of Box
+    {
+
+      auto gaussrnd = std::bind(&MT_RND::engine.operator(), &rnd, gauss_dist);
+      
       //6.1 Calculate loop partitions
       const unsigned long int outerloop =  (FrameExports > 0)*FrameExports + (FrameExports == 0)*1;
       const unsigned long int innerloop = T_stepsMax/outerloop;
+      
+      const unsigned long int outerloop =  camera.outerloop();
+      const unsigned long int innerloop = T_stepsMax/outerloop;
+
+      TimerHD time_simulation("Simulation");
+
+
 
       //6.2 Outer Loop → For FrameExports
       for(unsigned long int j = 0; j < outerloop; j++) //Outer Loop
@@ -266,57 +295,18 @@ public:
             //6.3.0
             SimCounter++; //Increment Simulation SimCounter
 
-            //6.3.1 Move All particles   D = 3, dim = 3 2*dim*D = 2*3*3
-            //<x^2> = 2*dim*D*dt = 4*D*t  ==> 18*t = MSD =<r^2>
-            for(auto &part : this->partlist)   //sqrt(4*i.D*dt)*gauss_dist(mt);
-            {
-              part.pos.x += std::sqrt(2*dim*part.D*dt)*gauss_dist(rnd.engine);
-              part.pos.y += std::sqrt(2*dim*part.D*dt)*gauss_dist(rnd.engine);
-              part.pos.z += std::sqrt(2*dim*part.D*dt)*gauss_dist(rnd.engine);
-
-              #if FCS_ENABLE_PBC == 1
-              	PBC(part.pos);
-              #endif
-            } //End of minor loop
+            //6.3.1 
+            dynamic_sweep();
 
             //6.3.2
             //Count the number of particles in the observation Volume & MSD Calculation
-            unsigned int InVolCount = 0; //Counts the number of particles in the Veff Volume
-            unsigned int FlashCount = 0; //Counts the number of partilces that flashed in the instant
+            unsigned int InVolCount = 0;
+            unsigned int FlashCount = 0;in the instant
+            
             double MSDi = 0; //Instantaneous MSD
-            for(auto &part : partlist) 
-            {
-              
-              //...1 MSD Calc
-              V msd_vec = part.pos - part.init_pos;
-              #if FCS_ENABLE_PBC == 1
-              	PBC(msd_vec); //TODO → Ask if this is strictly necessary
-              #endif 
+            msd_calc(MSDi);
 
-              MSDi += msd_vec.size_sq();
 
-              //...2 Check if the particle is in the observation Volume (2 different if statements)
-              if(Invol_Check(part.pos))
-              {
-                  //Set InVol flag TODO -> Test Necessacity
-                  part.InVol = true;
-
-                  //Particle is in Volume
-                  InVolCount++;
-                   
-
-                  //...3 Try flashing with set probability
-                  if(u_dist(rnd.engine) < PulseProbablity(part)) 
-                  {
-                      part.last_flash = SimCounter;
-                      part.Flash(); //Automatically sets "bleached state" if condition is met
-                      FlashCount++; //Particle did flash
-                  }
-              }
-
-              else
-                part.InVol = false; //TODO -> Test Necessacity
-            } //End of minor loop
 
             //Particle Tagging 
             #if FCS_PART_TAGGING == 1
@@ -354,9 +344,7 @@ public:
       {
         Launch_Python_Analysis();
         
-      }
-      
-      
+      } 
 
     } //End of Evolve()
 
@@ -580,7 +568,7 @@ public:
 
           else
             std::cerr << "[FATAL ERROR] Invalid State:" << __LINE__ << __FILE__ << '\n';
-        } //End of SetSession()
+    } //End of SetSession()
 
 
     void Launch_Python_Analysis()
@@ -597,7 +585,7 @@ public:
         time_for_plotting.Stop(); //Destroy object
     } //End of Launch_Python_Analysis()
 
-    
+
 }; //End of class LangevinBox[]
 
 //Concepts ↓

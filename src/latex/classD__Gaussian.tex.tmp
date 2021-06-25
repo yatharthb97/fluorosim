@@ -1,0 +1,42 @@
+\hypertarget{classD__Gaussian}{}\section{D\+\_\+\+Gaussian Class Reference}
+\label{classD__Gaussian}\index{D\+\_\+\+Gaussian@{D\+\_\+\+Gaussian}}
+
+
+Inheritance diagram for D\+\_\+\+Gaussian\+:
+% FIG 0
+
+
+Collaboration diagram for D\+\_\+\+Gaussian\+:
+% FIG 1
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classD__Gaussian_a1b5ec3efaa297b3dd676463d4dc8b8e8}\label{classD__Gaussian_a1b5ec3efaa297b3dd676463d4dc8b8e8}} 
+V {\bfseries exponents}
+\item 
+\mbox{\Hypertarget{classD__Gaussian_a437c9cba26a504611b7ce146fc18e52e}\label{classD__Gaussian_a437c9cba26a504611b7ce146fc18e52e}} 
+V {\bfseries centre}
+\item 
+\mbox{\Hypertarget{classD__Gaussian_a8aefe57e93506db81379130e22b6ab8e}\label{classD__Gaussian_a8aefe57e93506db81379130e22b6ab8e}} 
+V {\bfseries boundaries}
+\item 
+\mbox{\Hypertarget{classD__Gaussian_ac46eccf95b5b9bbc1988ec5e76729586}\label{classD__Gaussian_ac46eccf95b5b9bbc1988ec5e76729586}} 
+double {\bfseries norm} = 1.\+0
+\item 
+\mbox{\Hypertarget{classD__Gaussian_a324a41a35c216c71811dfd8223809294}\label{classD__Gaussian_a324a41a35c216c71811dfd8223809294}} 
+double {\bfseries radius}
+\item 
+\mbox{\Hypertarget{classD__Gaussian_adb66ac87e1fbb8eba4b7d2df8cca9f79}\label{classD__Gaussian_adb66ac87e1fbb8eba4b7d2df8cca9f79}} 
+double {\bfseries radius\+\_\+sq}
+\item 
+\mbox{\Hypertarget{classD__Gaussian_aca273a4fabafeb4a526da125d39059c5}\label{classD__Gaussian_aca273a4fabafeb4a526da125d39059c5}} 
+double {\bfseries sf}
+\item 
+\mbox{\Hypertarget{classD__Gaussian_a35649fcc21bfbb489617ecf9c0462ed1}\label{classD__Gaussian_a35649fcc21bfbb489617ecf9c0462ed1}} 
+double double {\bfseries sf}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+classes.\+hpp\end{DoxyCompactItemize}

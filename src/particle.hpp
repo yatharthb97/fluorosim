@@ -6,7 +6,25 @@
 #include<array>
 
 
-class Particle
+enum class fl_state_t
+{
+	Ground = 0,
+	Excited,
+	Triplet
+};
+
+
+
+enum class color_t
+{
+	default_color = 0,
+	red,
+	green,
+	yellow
+	
+};
+
+class Fluorophore
 {
 public:
 
@@ -20,21 +38,15 @@ public:
 	unsigned long int last_flash = 0;  //Time of last flash
 	//unsigned long int creation_t = 0;  //Time of Creation
 	
-	#if FCS_BLEACHING == 1
-  	bool bleached = false;    //Is the molecule bleached?
-  	unsigned int bleach_after;
-  #endif
 
+	fl_state_t state;
 
-	#if FCS_PER_PART_STATS == 1 //Calculate stats for every Particle
-		double dist = 0;
-		double dist_sq = 0;
-    unsigned int FlashCount;  //Number of times the molecule is flashed
-	#endif
+	int FlashCount;  //Number of times the molecule is flashed
+
 
 
   //Default Constructor
-  Particle(unsigned int partid, V &pos): partid(partid), pos(pos), init_pos(pos)
+  Fluorophore(unsigned int partid, V &pos): partid(partid), pos(pos), init_pos(pos)
   {}
 
 
@@ -104,8 +116,69 @@ std::ostream& operator<< (std::ostream &stream, const Particle &part)
 } //End of friend overload operator<<
 
 
-//Typename aliases
-using partlist_t = std::vector<Particle>;
 
-template<std::size_t N>
-using partlist_ft = std::array<Particle, N>;
+class Fluorophore_Base
+{
+
+	int partid;
+	V pos;
+	V pos_init;
+	fl_state_t state;
+	color_t color = color_t::default_color;
+	static Geometry geo(geo_core_t::point, geo_t::not_defind);
+	
+	Fluorophore_Base(): geo(Geometry(geo_core_t::point, geo_t::not_defind))
+	{}
+
+	int inline get_partid() const
+	{
+		return this->partid;
+	}
+	
+	V inline get_pos() const
+	{
+		return this->pos;
+	}
+
+	int inline get_init_pos() const
+	{
+		return this->pos_init;
+	}
+
+
+	fl_state_t inline get_state() const
+	{
+		return this->state;
+	}
+
+
+	color_t inline get_color() const
+	{
+		return this->color;
+	}
+
+	double virtual get_qm_yield() = 0; //Interface functions
+	double virtual get_excitation_p() = 0; //Interface functions
+	double virtual get_brightness() = 0; //Interface functions
+};
+
+
+enum class geo_core_t
+{
+	not_defined = 0,
+	point;
+	circle,
+	sphere,
+	spherocylinder,
+};
+
+
+
+class Geometry
+{
+	geo_core_t core = geo_core_t::not_defined;
+	geo_t geo = geo_t::not_defind;
+
+	Geometry()
+	{}
+};
