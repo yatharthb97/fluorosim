@@ -1,3 +1,7 @@
+### *This file is used to develop small essays on independent topics*
+
+
+
 + [ ] ACF
 + [ ] Detectivity
 + [ ] Pin Hole
@@ -115,7 +119,6 @@ $$
   $$
   \tau_{diff} = \frac{w_0^{2}}{4D}
   $$
-  
 
 
 

@@ -399,9 +399,11 @@ public:
 
     //22
     //! Multiply corresponding components of a vector.
-    inline V comp_mul(V &other) const
+    inline void comp_mul(const V &other)
     {
-        return V(x*other.x, y*other.y, z*other.z);
+        this->x = x*other.x;
+        this->y = y*other.y;
+        this->z = z*other.z;
     } //End of compmul()
 //**********************************************************************************
 
@@ -1041,7 +1043,7 @@ public:
 
     inline V square() const
     {
-        return V(this->x*this->x, this->y*this->y, this->z*this->z)
+        return V(this->x*this->x, this->y*this->y, this->z*this->z);
     }
 
     //Multi Vector Operations

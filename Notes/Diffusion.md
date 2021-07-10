@@ -1,3 +1,7 @@
+### → Everything about diffusion, update schemes, and dynamics of the system
+
+
+
 # Diffusion
 
 As diffusion does not require an external energy source for the transport of particles, it is also called **passive transport**.
