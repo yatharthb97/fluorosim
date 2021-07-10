@@ -202,12 +202,12 @@ k_{B}T \quad [=] \quad [\epsilon] \quad &[=] \quad [M][L]^2[t]^{-2}\\
 \sigma \quad &[=] \quad [L]\\
 \end{align}
 $$
-We now try to form the basis for some other basic units using dimensional analysis to do basic unit conversions,
+We now try to form the basis for some other basic units using dimensional analysis to do basic unit conversions for time, mass, and force.
 $$
 \begin{align}
 [t] &= [\gamma] \space [k_{B}T]^{-1} \space [L]^{2}\\
-[M] &= [\gamma]^{2} \space [k_{B}T]^{-1} \space [L]^{2}\\
-[F] &= [k_{B}T] \space [L]^{-1}\\
+[m] &= [\gamma]^{2} \space [k_{B}T]^{-1} \space [L]^{2}\\
+[f] &= [k_{B}T] \space [L]^{-1}\\
 \end{align}
 $$
 
@@ -215,9 +215,9 @@ $$
 The above dimensional equations directly convert to:
 $$
 \begin{align}
-t_{real} &= \frac{\gamma \sigma^{2}}{k_{B}T} \space t_{sim} \quad (time)\\
-m_{real} &= \frac{\gamma^{2}\sigma^{2}}{k_{B}T} \space m_{sim} \quad (mass) \label{mass_conv}\\ 
-F_{real} &= \frac{k_{B}T}{\sigma} \space F_{sim} \quad (force)
+t_{real} &= \frac{\gamma \sigma^{2}}{k_{B}T} \space t_{sim}  = T_{s→r} \space t^{*}\\
+m_{real} &= \frac{\gamma^{2}\sigma^{2}}{k_{B}T} \space m_{sim}   = M_{s→r} \space m^{*} \label{mass_conv}\\ 
+f_{real} &= \frac{k_{B}T}{\sigma} \space f_{sim}   = F_{s→r} \space f^{*}
 \end{align}
 $$
 
