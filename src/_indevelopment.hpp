@@ -53,17 +53,7 @@ void __attribute__((always_inline)) msd_calc(double &MSDi, unsigned int &InVolCo
 }
 
 ///// Freeze Photophysics time coordinate
-//Loop → absorbance
-for(auto &part : this->partlist)   //sqrt(4*i.D*dt)*gauss_dist(mt);
-{
-	part.try_absorb();
-} //End of minor loop
 
-//Loop → emittance
-for(auto &part : this->partlist)   //sqrt(4*i.D*dt)*gauss_dist(mt);
-{
-	part.try_emit();
-} //End of minor loop
 
 //Loop → detection
 for(auto &part : this->partlist)
