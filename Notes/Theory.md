@@ -1,3 +1,13 @@
+# Theory and Units
+
+This article explains the basic set of equations governing the Langevin model simulation of an FCS process. Further, it includes a thorough discussion on the units conversions needed for the simulation. Implementation is also briefly discussed. The last section details a conversion case study.
+
+
+
+***Table of Contents:***
+
+[TOC]
+
 # Langevin Equation
 
 The Langevin equation simulates Brownian motion of particles. The equation can be solved to simulate non-equilibrium systems. 
@@ -135,13 +145,12 @@ The use of Simulation units *tries* normalizes the numeric domain of all paramet
 > ​	```sizeof(float) = sizeof(1 bit) * (S+E+M)```
 >
 > But if a value is given to the float, which is larger or smaller than the set normalized bounds, the float takes a *denormalized* form (e.g. 0.0000000...1). The operation of a normalized float with a denormalized float can lead to undefined behavior. In scientific computing, these cases can be a common occurrence when many complex arithmetic operations are performed(especially subtractive cancellation). It is thus advisable to work with units that are neither too small nor too large.
->
 
 
 
 ## Setting Scale
 
-The aim of this section is to reduce the dimensionality of the equations describing the system to zero. The most effective way to do this is to select a scale for fundamental units and then divide the equation with a combination of these reduced units that has the same dimensionality as our equation.
+The aim of this section is to reduce the *dimensionality* of the equations describing the system to zero. The most effective way to do this is to select a scale for fundamental units and then divide the equation with a combination of these reduced units that has the same dimensionality as our equation.
 
 We first introduce a notation:
 
@@ -154,7 +163,7 @@ We first introduce a notation:
 
 #### Length and Energy
 
-We then define a scale for *length, energy  →  $\sigma, \epsilon$* such that:
+We define a scale for *length and  energy  →  $\sigma \space and \space \epsilon$* such that:
 $$
 \begin{align}
 \sigma&= 2R \quad (diamter) \space \label{distance_conv}\\
@@ -162,7 +171,7 @@ $$
 \end{align}
 $$
 
-This sets the diameter of the particle to unity. Note that equation ($\ref{thermal_ene_conv}$) can also be solved with a constant temperature $T$.  And also immediately leads to non-dimensionalization of the potential energy equations and distance equations:
+This sets the diameter of the particle in reduced units to unity. Note that equation ($\ref{thermal_ene_conv}$) can be solved with a constant temperature $T$. These equations lead immediately to non-dimensionalization of the potential energy equations and distance equations:
 $$
 \begin{align}
 U &= U^{*}k_{B}T = U^{*}\epsilon\\
@@ -170,7 +179,7 @@ r &= r^{*}\sigma
 \end{align}
 $$
 
-> ​	Special Note: Also distance and energy values are hence expressed in simulation units.
+> ​	Special Note: The distance and energy values in the simulation are thus implicitly in simulation units and hence need to be converted to real units.
 
 #### Viscosity
 
@@ -181,7 +190,7 @@ F_d &= 3\pi \eta \sigma v = \gamma v \label{stokes}\\
 F_d &= \frac{v}{\gamma}
 \end{align}
 $$
-We say, $3\pi \eta \sigma = \gamma$  → which is the *inverse of mobility.* And $1/ \gamma = \Gamma$ → which is then the  *mobility*. This *inverse of mobility or "gamma factor" for convenience*, will be used readily for other conversions. The *"gamma factor"* can also be referred to as the *damping factor* and has the dimensions $$[\gamma] = [\eta\sigma] = [ML^{-1}T^{-1}] * [L] = [MT^{-1}]$$.
+The *"gamma factor"* or the *damping factor* has the dimensions $$[\gamma] = [\eta\sigma] = [ML^{-1}T^{-1}] * [L] = [MT^{-1}]$$.
 
 Using equation ($\ref{stokes}$) we calculate the conversion for *Dynamic Viscosity* ($\eta$),
 $$
@@ -194,7 +203,7 @@ Note that $$[\eta^*] = [1] \quad$$(dimensionless).
 
 #### Time, mass, and force
 
-Using these three units as the basis, other units can be derived. By using dimensional analysis,
+Using these three units *(length, energy, and viscosity)* as the basis, other units can be derived. By using dimensional analysis,
 $$
 \begin{align}
 \gamma \quad [=]  \quad [\eta\sigma] \quad &[=] \quad [M][t]^{-1}\\
@@ -231,6 +240,8 @@ $$
 \tau = \Big(\frac{\sigma^{2}}{D}\Big) \space \tau^* = \Big(\frac{\gamma \sigma^{2}}{k_{B}T}\Big) \space \tau^*
 $$
 
+#### Monomer Density
+
 [Incomplete] Calculation for density of the particle: 
 $$
 V = \frac{4}{3}\pi (\sigma/2)^{3} = \frac{\pi \sigma^{3}}{6}
@@ -259,5 +270,16 @@ We arrive at a fixed mass density for monomer in simulation units which is propo
 
 Based on this, the value of $D^*$ and $m^*$ can be set appropriately. If we assume that the mass density of the monomer, $\rho_m$ is approximately same as the fluid, then the mass $m^*$ is also set base on equation (52).
 
+## `class Units` : Implementation
 
+
+
+The instance of the object `class Units` can be constructed by providing a value for the length, energy, and viscosity — our three fundamental units. Other units can be derived based on these fundamental scales.
+
+There are two different set of functions in the class that provide the conversion factors required to convert to and from between simulation and real units. The functions follows this suffix convention:
+
++  `Units::rtos_xxx()`  → provides a conversion factor to convert *from real to simulation units.*
++ `Units::stor_xx()` → provides a conversion factor to convert from *simulation units to real units.*
+
+## Case Study: Units Comparison
 
