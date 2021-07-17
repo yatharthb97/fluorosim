@@ -3,19 +3,22 @@
 #include <iostream>
 #include <random>
 #include <functional>
-#include "detector.hpp"
+/*#include "detector.hpp"
 #include "colors.hpp"
 #include "camera.hpp"
 #include "datapipe.hpp"
 #include "particle.hpp"
 #include "fluorophore.hpp"
 #include "fluorophoresX.hpp"
-#include "./submodules/random.hpp"
+#include "./submodules/random.hpp"*/
+
+#include "units.hpp"
+#include "macros.hpp"
 
 
 int main()
 {
-	using ColorDetector = Detector<color_t>;
+/*	using ColorDetector = Detector<color_t>;
 	ColorDetector red_detect(color_t::red);
 
 	Camera cam(14);
@@ -38,7 +41,13 @@ int main()
     for (unsigned int i = 0; i < 1000 ; i++)
     {
     	std::cout << unirnd() << std::end;
-    }
+    }*/
+
+
+    Units unit;
+    unit.set_scale_STE(2*1e-9, 300, CONST_WATER_VISCOSITY);
+
+    std::cout << unit.profile(1e-3, 1e8) << std::endl;
 }
 
 

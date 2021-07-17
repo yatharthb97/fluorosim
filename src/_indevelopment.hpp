@@ -337,3 +337,77 @@ public:
 };
 
 
+//Notes:
+
+  //Brownian Time (time for a particle to diffuse the square of its diameter) → sigma*sigma/6*D
+
+
+
+
+
+
+//Low Reynolds number regime
+/*namespace Environment
+{
+	
+	static std::string medium = "Fluid";
+	static bool lowReynoldsNo = true;
+	static double Viscosity = 0.0;
+	static double Density = 0.0;
+	
+	double ReynoldsNo(double length, double velocity)
+	{
+		//Re = Lvρ/η
+		using Env = Environment;
+		return length * velocity * Env::Density * Env::Viscosity;
+	}
+};*/
+
+
+//One of the most striking aspect of low Reynolds number phenomena is that the speed of an object is solely determined by the forces acting on it at the moment.
+
+
+// In particular, W(t) is almost everywhere discontinuous and has infinite variation. In an intuitive picture, it can be seen as the continuous-time equivalent of a discrete sequence of independent random numbers.
+
+
+
+
+
+/////////////////////////////////////////////////////////| LJ UNITS
+  // "get" → Preffix
+
+    ////Inputs → Sigma, Epsilon, Mass
+    void LJUnits(double Sigma, double Epsilon, double Mass)
+    {
+        
+        this->Sigma = Sigma;
+        this->Epsilon = Epsilon;
+        this->Mass = Mass;
+
+        //Set Epsilon based Attributes
+        setEpsilon(Epsilon); //!!! Temperature is set twice, design choice
+
+        //Gamma Is Unset
+
+        /* USE ↓
+           Units lj;
+           lj.LJUnits(s,e,m)
+           lj.getLJ_TempFactor()
+           lj.getLJ_TDT()
+      
+        */
+    }
+
+    double getLJ_TDT() //For Lennard Jones System
+    {
+      return Sigma * std::sqrt(Mass / Epsilon);
+    }
+
+
+    //NOK
+    double getLJ_TempFactor() //For Lennard Jones
+    {
+      return KBT / Epsilon;
+    }
+/////////////////////////////////////////////////////////| LJ UNITS
+

@@ -1,261 +1,188 @@
-// UNUSED FILE
 #pragma once
+
 #include <cmath>
 #include <sstream>
 #include <iomanip>
+
 #include "macros.hpp"
 
-//What are the inpts? → Scale units, Viscosity of medium
+
 class Units
 {
-  public:
+public:
+
+/////////////////////////////////////////////////| Member List
+  
+  //Length Scale
+  double Sigma = 1e-9;
+
+  //Energy Scale
+  double Epsilon = 1.0;
+
+  //Viscosity Scale
+  double Eta = CONST_WATER_VISCOSITY;
+
+  //Needs to be calculated
+  double Gamma_scale = Eta * Sigma;
+  double Mass_scale = Gamma_scale * Gamma_scale * Sigma * Sigma / Epsilon;
+  double Time_scale = Gamma_scale * Sigma * Sigma / Epsilon;
+  double Force_scale = Epsilon / Sigma;
+
+  double T_reduced = Epsilon / CONST_Kb;
+
 /////////////////////////////////////////////////////////| Member List
   
-  //Declared Simulation Scale & Parameters
-  double Sigma = 1e-8;
-  double Epsilon = 10;
-  double Mass = 1.0;
 
-  double Time = 1.0;
-
-  double Viscosity = CONST_WATER_VISCOSITY; //Medium is the same
-  double Gamma = 3 * CONST_PI * Viscosity * Sigma; //Gamma (Inverse of Mobility)
-
-  //Derived From Epsilon ↓
-  double T = 273.0; //Temperatur is the same
-  double KBT = T*CONST_Kb; //Energy Scale of the Thermal Fluctuation
-  double Beta = 1/KBT;
-
-  //Status Flags
-  bool temp_fixed = false;
-  /////////////////////////////////////////////////////////| Member List
-  
-
-/////////////////////////////////////////////////////////| CONFIG
-  
-  //Blank Constructor
-  Units()
-  {}
-
-
-  ////Inputs → Sigma, Epsilon, Viscosity
-  void setSEV(double Sigma, double Epsilon, double Viscosity)
+  ////Inputs → Sigma, Epsilon, Viscosity (Eta)
+  void set_scale_SEE(double Sigma, double Epsilon, double Viscosity)
   {
     
       this->Sigma = Sigma;
       this->Epsilon = Epsilon;
-      this->Viscosity = Viscosity;  
+      this->Eta = Viscosity;  
 
-      //Set Epsilon based Attributes → T
-      setEpsilon(Epsilon); //!!! Temperature is set twice, design choice
-
-      //Set Gamma (Inverse of Mobility)
-      this->Gamma = 3 * CONST_PI * Viscosity * Sigma;
-
-      //Mass is implicitly set
-      this->Mass = rf_mass()*1.0;
-
-      //Time is also implicitly set
-      this->Time = rf_time()*1.0;
+      set_quantities(); //Recalculate all quantities
   }
 
 
-  ////Inputs → Sigma, Epsilon, Viscosity
-  void setSTV(double Sigma, double Temp, double Viscosity)
-  {
-      
+  ////Inputs → Sigma, Epsilon, Viscosity (Eta)
+  void set_scale_STE(double Sigma, double Temp, double Viscosity)
+  {  
       this->Sigma = Sigma;
-      this->Viscosity = Viscosity;  
+      this->Epsilon = Temp * CONST_Kb;
+      this->Eta = Viscosity;
 
-      //Set Epsilon based Attributes → T
-      setTemp(Temp); //!!! Temperature is set twice, design choice
-
-      //Set Gamma (Inverse of Mobility)
-      this->Gamma = 3 * CONST_PI * Viscosity * Sigma;
-
-      //Mass is implicitly set
-      this->Mass = rf_mass()*1.0;
-
-      //Time is also implicitly set
-      this->Time = rf_time()*1.0;
+      set_quantities(); //Recalculate all quantities
   }
 
-
-  void setEpsilon(double epsilon)
+  /**
+   * @brief Recalculates the other scales.*/
+  void set_quantities()
   {
-    this->KBT = epsilon;
-    this->T = epsilon/CONST_Kb;
-    this->Beta = 1/KBT;
-    
-    this->temp_fixed = false;
+    this->Gamma_scale = Eta * Sigma;
+    this->Mass_scale = Gamma_scale * Gamma_scale * Sigma * Sigma / Epsilon ;
+    this->Time_scale = Gamma_scale * Sigma * Sigma /Epsilon;
+    this->Force_scale = Epsilon / Sigma;
+
+    //Reduced Temperature
+    this->T_reduced = this->Epsilon / CONST_Kb;
   }
 
-  void setTemp(double newT)
-  {
-    this->T = newT;
-    this->KBT = newT*CONST_Kb;
-    this->Beta = 1/KBT;
-    
-    this->temp_fixed = true;
-  }
-  /////////////////////////////////////////////////////////| CONFIG
-  
+// stor_xxx() functions  
 
-/////////////////////////////////////////////////////////| LANG UNITS
-// Simulation Units Can be multiplied by the return values of the functions given below to get real SI units. ↓ "real" priffix
-
-  //Check Again
-  double rf_BrownianTime() const
-  {
-    ///Brownian Time (time for a particle to diffuse the square of its diameter) → sigma*sigma/6*D
-    return Sigma * Sigma / (rf_D()); //(3D form)
-  }
-  
-  //OK
-  double rf_volume() const
+  //1
+  double stor_volume() const
   {
     return Sigma * Sigma * Sigma;
   } 
 
-  //OK
-  double rf_mass() const
+  //2
+  double stor_mass() const
   {
-    return Gamma * Gamma * Sigma * Sigma * Beta;
+    return Mass_scale;
   }
 
-  //Ok
-  double rf_time() const
+  //3
+  double stor_time() const
   {
-    return Gamma * Sigma * Sigma * Beta;
+    return Time_scale;
   }
 
-  //OK
-  double rf_force() const
+  //4
+  double stor_force() const
   {
-    return KBT/Sigma;
+    return Force_scale;
   }
 
-  //OK
-  double rf_viscosity() const
+  //5
+  double stor_viscosity() const
   {
-    return Gamma / Sigma;
+    return Eta;
   }
 
-  //OK
-  double rf_D() const
+  //6
+  double stor_D()  const
   {
-    return KBT / Gamma;
+    return Epsilon/Gamma_scale;
   }
 
-  //OK
-  double rf_DiffTimeScale() const//Diffusion Time Scale Factor
+  //7
+  double stor_difftimescale() const
   {
-    return Sigma * Sigma * Beta;
+    return Time_scale;
   }
 
-  //For Spherical Particles Only
-  double rf_Monomer_MDensity() const
+//rtos_xxx() functions
+
+  //1
+  double rtos_volume() const
   {
-      return realMassFactor() / realVolumeFactor();
+    return 1/stor_volume();
+  } 
+
+  //2
+  double rtos_mass() const
+  {
+    return 1/stor_mass();
   }
+
+  //3
+  double rtos_time() const
+  {
+    return 1/stor_time();
+  }
+
+  //4
+  double rtos_force() const
+  {
+    return 1/stor_force();
+  }
+
+  //5
+  double rtos_viscosity() const
+  {
+    return 1/stor_viscosity();
+  }
+
+  //6
+  double rtos_D() const
+  {
+    return 1/stor_D();
+  }
+
+  //7
+  double rtos_difftimescale() const
+  {
+    return 1/stor_difftimescale();
+  }
+
   /////////////////////////////////////////////////////////| LANG UNITS
 
 
-  std::string profile(double dt, double total_steps) const
+  std::string profile(double step_size, double total_steps) const
   {
     std::ostringstream buffer;
-    buffer << std::setprecision(FCS_FLOAT_SHORT_PRECISION) << std::boolalpha;
+    buffer << std::setprecision(FCS_FLOAT_SHORT_PRECISION) << std::boolalpha << std::scientific;
 
     buffer << "————→   Units — Corresponding Real(SI) Unit per 1.0 Sim Unit  ←————\n\n";
     
     buffer << " • Sigma(m) : " << this->Sigma << " (Set)\n";
-    buffer << " • Temp(K) : " << this->T << (temp_fixed == true ? " (Set)" : "") << '\n';
-    buffer << " • Thermal Energy - KbT(J) : " << this->KBT << (temp_fixed == false ? " (Set)" : "") << '\n';
-    buffer << " • Viscosity (Pa • s): " << this->Viscosity << " (Set)\n";
-    buffer << " • Gamma : " << this->Gamma << "\n\n";
+    buffer << " • Temp(K) : " << this->Epsilon/CONST_Kb << " (Set)\n";
+    buffer << " • Thermal Energy - kBT(J) : " << this->Epsilon << " (Set)\n";
+    buffer << " • Viscosity (Pa • s): " << this->Eta << " (Set)\n";
 
-    buffer << " • Time(s) : " << this->Time << '\n';
-    buffer << " • Time Step(s) : " << this->Time*dt << '\n';
-    buffer << " • Total Simulation Time(s) : " << this->Time * total_steps << "\n\n";
+    buffer << " • Gamma : " << this->Gamma_scale << "\n\n";
 
-    buffer << " • Mass(kg) : " << this->rf_mass() << '\n';
-    buffer << " • Force(N) : " << this->rf_force() << '\n';
+    buffer << " • Time(s) : " << this->Time_scale << '\n';
+    buffer << " • Time Step(s) - " << step_size << " : " << this->Time_scale * step_size << '\n';
+    buffer << " • Total Simulation Time(s) - " << total_steps << " steps : "<< this->Time_scale * total_steps << "\n\n";
+
+    buffer << " • Mass(kg) : " << this->Mass_scale << '\n';
+    buffer << " • Force(N) : " << this->Force_scale << '\n';
+    buffer << " • Diffusivity D : " << this->stor_D() << '\n';
 
    return buffer.str();
   }
 
 }; //End of class Units
 
-//Notes:
-
-  //Brownian Time (time for a particle to diffuse the square of its diameter) → sigma*sigma/6*D
-
-
-
-
-
-
-//Low Reynolds number regime
-/*namespace Environment
-{
-	
-	static std::string medium = "Fluid";
-	static bool lowReynoldsNo = true;
-	static double Viscosity = 0.0;
-	static double Density = 0.0;
-	
-	double ReynoldsNo(double length, double velocity)
-	{
-		//Re = Lvρ/η
-		using Env = Environment;
-		return length * velocity * Env::Density * Env::Viscosity;
-	}
-};*/
-
-
-//One of the most striking aspect of low Reynolds number phenomena is that the speed of an object is solely determined by the forces acting on it at the moment.
-
-
-// In particular, W(t) is almost everywhere discontinuous and has infinite variation. In an intuitive picture, it can be seen as the continuous-time equivalent of a discrete sequence of independent random numbers.
-
-
-
-
-
-/////////////////////////////////////////////////////////| LJ UNITS
-  // "get" → Preffix
-
-    ////Inputs → Sigma, Epsilon, Mass
-    void LJUnits(double Sigma, double Epsilon, double Mass)
-    {
-        
-        this->Sigma = Sigma;
-        this->Epsilon = Epsilon;
-        this->Mass = Mass;
-
-        //Set Epsilon based Attributes
-        setEpsilon(Epsilon); //!!! Temperature is set twice, design choice
-
-        //Gamma Is Unset
-
-        /* USE ↓
-           Units lj;
-           lj.LJUnits(s,e,m)
-           lj.getLJ_TempFactor()
-           lj.getLJ_TDT()
-      
-        */
-    }
-
-    double getLJ_TDT() //For Lennard Jones System
-    {
-      return Sigma * std::sqrt(Mass / Epsilon);
-    }
-
-
-    //NOK
-    double getLJ_TempFactor() //For Lennard Jones
-    {
-      return KBT / Epsilon;
-    }
-/////////////////////////////////////////////////////////| LJ UNITS
