@@ -165,9 +165,9 @@ public:
   	#if FCS_VEFF_ELLIPSOID == 1 //Block that defined a *3D Gaussian* Veff
 
   		//Equivalent to {2/(rx^2), 2/(ry^2), 2/(rz^2)} in the PSF Expression
-  		PSF_exponent.x = 2/(veff.radius*veff.radius);
-  		PSF_exponent.y = 2/(veff.radius*veff.radius);
-  		PSF_exponent.z = 2/(veff.radius*veff.radius*veff.sf*veff.sf);
+  		PSF_exponent.x = -2/(veff.radius * veff.radius);
+  		PSF_exponent.y = -2/(veff.radius * veff.radius);
+  		PSF_exponent.z = -2/(veff.radius * veff.radius * veff.sf * veff.sf);
 
  		AD_Radius.x =  veff.radius;	
  		AD_Radius.y =  veff.radius;
@@ -198,7 +198,7 @@ public:
 
 
       //Set Fixed Step Size
-      this->Max_Step_Size = std::sqrt(2*dim*partlist[0].D*dt);
+      this->Max_Step_Size = std::sqrt( 2 * this->dim * partlist[0].D * dt);
 
 	    //3.5 Print Box Profile
 	    this->profile_str = this->Profile();
@@ -401,9 +401,9 @@ public:
     double PSF(const V &pos) const
     {
       //AD_Sigma = Airy Disk Sigma (x=y, z=sf*x)
-      double exponent = (pos.X_sq()*PSF_exponent.X_sq()*-1 + 
-                         pos.Y_sq()*PSF_exponent.Y_sq()*-1 +
-                         pos.Z_sq()*PSF_exponent.Z_sq()*-1);
+      double exponent = (pos.X_sq()*PSF_exponent.X() + 
+                         pos.Y_sq()*PSF_exponent.Y() +
+                         pos.Z_sq()*PSF_exponent.Z());
 
       return PSF_norm * std::exp(exponent);
   
@@ -497,7 +497,7 @@ public:
 
     	buffer << "\n————→  Box Parameters  ←————\n"; //BOX
     	buffer << " • Box Edge: "<< Edge << " | No. Density: " << Rho << " | Particles: " << Part_no;
-      buffer << "\n • Concentration: " << Rho*1e-6/(CONST_Avogadro*units.realVolumeFactor())<< " mol/cm3"
+      buffer << "\n • Concentration: " << Rho*1e-6/(CONST_Avogadro*units.stor_volume())<< " mol/cm3"
              << " | • Box Volume: "<< this->Vol << '\n';
 
     	buffer << "\n • Total Steps: " << T_stepsMax << " | Step Size: " << dt << '\n';
@@ -507,7 +507,7 @@ public:
     	buffer << " • Box Symmetric: " << (FCS_SYMMETRIC_BOX == 1) << " | PSF Type: "
     		   << (FCS_VEFF_ELLIPSOID == 1 ? "Ellipsoid - 3D Gaussian" : "Uniform Spherical") << '\n';
 
-      double femto_vol = veff.vol * units.realVolumeFactor() * 1e18;
+      double femto_vol = veff.vol * units.stor_volume() * 1e18;
     	buffer << "\n————→  Veff Parameters  ←————\n"; //VEFF
       buffer << " • Veff Volume/Box Volume: " << veff.vol/this->Vol << " | Real Vol: "<< femto_vol <<" fL \n";
       buffer << " • Volume of Veff: " << veff.vol << " | Veff Radii(x,y,z): " << AD_Radius << '\n';

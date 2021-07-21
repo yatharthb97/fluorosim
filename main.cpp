@@ -24,7 +24,7 @@ int main()
 
 	//5. Create Box Object → LangevinBox(Rho, Part_no, FrameExports, simclock, laser, veff)
 	int write_frames = 100;
-	double Rho = 0.1e-6;
+	double Rho = 1e-6;
 	int Part_no = 500;
 	
 	gl::do_pos_plots = true;
@@ -32,7 +32,7 @@ int main()
 
 	//Units(double Sigma, double Temp, double Viscosity)
 	Units units;
-	units.setSTV(1e-9, 273.16, CONST_WATER_VISCOSITY);
+	units.set_scale_STE(1e-9, 273.16, CONST_WATER_VISCOSITY);
 
 	LangevinBox box(Rho, Part_no, write_frames, simclock, laser, veff, units);
 
