@@ -8,6 +8,7 @@
 
 //Header File that describes Laser Objects.
 
+//0
 /**
  * @brief Base Laser Object Interface. It is completely interfaced and and cannot be instantiated.
  * */
@@ -50,6 +51,8 @@ public:
 
 }; // End of class Laser
 
+
+//1
 /**
  * @brief Constant and Steady Laser Source with unit Intensity.
  * */
@@ -78,13 +81,16 @@ public:
 	{
 		std::ostringstream laserinfo;
 
-		laserinfo << "• Unit Laser : " << color::color_str(this->Color);
+		laserinfo << "• Unit Laser (always-on) : " << color::color_str(this->Color) << 
+				  << " | Normalised intensity : 1.0 ";
 		return laserinfo.str();
 	}
 
 
 }; // End of class UnitLaser
 
+
+//2
 /**
  * @brief Emulates a laser beam with fixed normalized intensity <= 1.0.
  * */
@@ -115,15 +121,15 @@ public:
 	{
 		std::ostringstream laserinfo;
 
-		laserinfo << "• Steady Laser : " << color::color_str(this->Color) 
-		          << " | Intensity : " << this->Intensity;
+		laserinfo << "• Steady Laser (always-on) : " << color::color_str(this->Color) 
+		          << " | Normalised intensity : " << this->Intensity;
 		return laserinfo.str();
 	}
 
 
 }; // End of class SteadyLaser
 
-
+//3
 /**
  * @brief Emulates a laser beam with an exponentially decaying but periodic intensity profile.
  * */
@@ -166,3 +172,83 @@ public:
 
 
 }; // End of class SteadyLaser
+
+
+//4
+/**
+ * @brief Emulates a laser beam which is on during even timesteps and off during odd timesteps.
+ * */
+class EvenLaser : public Laser
+{
+public:
+
+	/**
+	 * @brief Only Constructor.
+	 * */
+	EvenLaser(color_t Color): Laser(Color)
+	{}
+
+	/**
+	 * @Brief Returns a periodic exponentially decaying normalized intensity profile.
+	 * */
+	n_intensity_t inline intensity(simcounter_t time) const
+	{
+        return (time & 1);
+	}
+
+	/**
+	 * @brief Descriptor.
+	 * */
+	std::string inline profile() const
+	{
+		std::ostringstream laserinfo;
+
+		laserinfo << "• Even Laser (pulsing): " << color::color_str(this->Color) << '\n'
+		          << "• Normalised intensity : 1.0 during even clock time.\n"
+		          << "• Normalised intensity : 0.0 during odd clock time.\n"
+		          
+		return laserinfo.str();
+	}
+
+
+}; // End of class EvenLaser
+
+
+//5
+/**
+ * @brief Emulates a laser beam which is on during odd timesteps and off during even timesteps.
+ * */
+class OddLaser : public Laser
+{
+public:
+
+	/**
+	 * @brief Only Constructor.
+	 * */
+	OddLaser(color_t Color): Laser(Color)
+	{}
+
+	/**
+	 * @Brief Returns a periodic exponentially decaying normalized intensity profile.
+	 * */
+	n_intensity_t inline intensity(simcounter_t time) const
+	{
+        return !(time & 1);
+	}
+
+	/**
+	 * @brief Descriptor.
+	 * */
+	std::string inline profile() const
+	{
+		std::ostringstream laserinfo;
+
+		laserinfo << "• Odd Laser (pulsing): " << color::color_str(this->Color) << '\n'
+		          << "• Normalised intensity : 1.0 during odd clock time.\n"
+		          << "• Normalised intensity : 0.0 during even clock time.\n"
+		          
+		return laserinfo.str();
+	}
+
+
+}; // End of class EvenLaser
