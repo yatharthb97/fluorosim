@@ -2,9 +2,7 @@
 #pragma once
 
 #include <cmath>
-#include <vector>
 #include <cassert> //For assert
-#include <exception> //For std::terminate
 
 #include "macros.hpp"
 #include "phenomena.hpp"
