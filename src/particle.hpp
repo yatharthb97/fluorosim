@@ -91,13 +91,13 @@ public:
 
 //Members
 	V Pos; //! Position of the particle
-
+	V Init_Pos; //! The inital position of the particle saved initally
 //Methods
 
 	/**
 	 * @brief Constructor
 	 * */
-	Point_Particle(const V &Pos): Pos(Pos)
+	Point_Particle(const V &Pos): Pos(Pos), Init_Pos(Pos)
 	{}
 
 
@@ -142,6 +142,13 @@ public:
 	void virtual inline set_pos(const V &new_pos)
 	{
 		this->Pos = new_pos;
+	}
+
+	/**
+	 * @brief Returns the displacement vector with respect to the inital position. */
+	V virtual inline get_init_displacement() const
+	{
+		return (this->Pos - this->Init_Pos);
 	}
 
 };
