@@ -39,10 +39,14 @@ using enum_int_t = std::uint_fast8_t; // Enum integer type
 //5. Enables the offsetting of the PSF from the centre position
 #define FCS_PSF_OFFSET 0
 
-//----> These Macro Features don't affect results of simulations
+
+
+//--------------> These Macro Features don't affect results of simulations <--------------\\
 
 //I. Take a sample of random number distributions and get a corresponding plot
 #define FCS_RND_SAMPLING 0
+// Sample Length for Random Sampling - Only used when FCS_RND_SAMPLING is ON(1).
+#define FCS_RND_SAMPLE_SIZE 100000
 
 
 //II. Enable Particle Tagging for a single particle defined by FCS_TAG_PARTID 
@@ -52,11 +56,6 @@ using enum_int_t = std::uint_fast8_t; // Enum integer type
 //III. Calculate Extra Statistics for all particles
 #define FCS_PER_PART_STATS 1
 
-
-//-----> Extra Features → Yet to be implemented
-
-// Allow Bleaching Mode
-#define FCS_BLEACHING 0
 
 
 

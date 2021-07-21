@@ -173,8 +173,8 @@ public:
 
     buffer << " • Gamma : " << this->Gamma_scale << "\n\n";
 
-    buffer << " • Time(s) : " << this->Time_scale << '\n';
-    buffer << " • Time Step(s) - " << step_size << " : " << this->Time_scale * step_size << '\n';
+    buffer << " • Time Scale(s) : " << this->Time_scale << '\n';
+    buffer << " • One Time Step(s) - " << step_size << " : " << this->Time_scale * step_size << '\n';
     buffer << " • Total Simulation Time(s) - " << total_steps << " steps : "<< this->Time_scale * total_steps << "\n\n";
 
     buffer << " • Mass(kg) : " << this->Mass_scale << '\n';

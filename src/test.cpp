@@ -47,7 +47,7 @@ int main()
     Units unit;
     unit.set_scale_STE(2*1e-9, 300, CONST_WATER_VISCOSITY);
 
-    std::cout << unit.profile(1e-3, 1e8) << std::endl;
+    std::cout << unit.profile(1e-2, 1e8) << std::endl;
 }
 
 

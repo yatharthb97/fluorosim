@@ -17,13 +17,13 @@ public:
 	/**
 	 * @brief Default Constructor - Sets the color to colorless explicitly
 	 * */
-	FluorophoreX05(const V &Pos) : Point_Particle(Pos), Fluorophore_Basic(color_t::colorless), Diffusive(1.0)
+	FluorophoreX05(const V Pos = V()) : Point_Particle(Pos), Fluorophore_Basic(color_t::colorless), Diffusive(1.0)
 	{}
 
 	/**
 	 * @brief Contructor that sets the diffusivity and the QM yield of the Fluorophore.
 	 * */
-	FluorophoreX05(const V &Pos, const double Diffusivity) : Point_Particle(Pos), Fluorophore_Basic(color_t::colorless), Diffusive(Diffusivity)
+	FluorophoreX05(const V Pos = V(), const double Diffusivity) : Point_Particle(Pos), Fluorophore_Basic(color_t::colorless), Diffusive(Diffusivity)
 	{}
 
 //Fluorophore_Basic overrides

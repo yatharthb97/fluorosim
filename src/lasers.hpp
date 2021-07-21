@@ -40,6 +40,14 @@ public:
 	 * */
 	std::string inline virtual profile() = 0;
 
+	//3
+	/**
+	 * @brief Returns the color of the laser. */
+	color_t inline get_color() const
+	{
+		return this->Color;
+	}
+
 }; // End of class Laser
 
 /**

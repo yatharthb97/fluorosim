@@ -11,6 +11,7 @@ typedef double n_intensity_t;//! Normalization applied on intensity type. With v
 
 typedef double bernoulli_p_t; //! Represents a Bernoulli Probability. With values restricted between 0 and 1. 
 typedef bool bin_detect_t;
+
 typedef simcounter_t discrete_freq_t;	
 //channel_t → is a template parameter used in the detector framework.
 
