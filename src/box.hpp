@@ -17,8 +17,9 @@
 #include "macros.hpp"
 #include "particle.hpp"
 #include "gl.hpp"
-#include "classes.hpp"
+#include "clock.hpp"
 #include "units.hpp"
+#include "phenomena.hpp"
 
 #include "./submodules/vector.hpp"
 #include "./submodules/random.hpp"
@@ -349,7 +350,9 @@ public:
         
         //Print Information
         std::ostringstream info;
-        info << "• Snapshots: " << outerloop << "  • Photosteps per Brownian steps: " << inner_photoloop << '\n';
+        info << "• Snapshots: " << outerloop;
+        info << "\n • Brownian Steps: " << clock.max_steps(Evol::Brownian);
+        info << "\n • Photosteps per Brownian steps: " << inner_photoloop << '\n';
         std::cout << info.str();
         //Print Information
 
@@ -367,7 +370,7 @@ public:
                 //For One Brownian Time Step ↓        
 
                 //Increment SimCounter
-                this->SimCounter++; //Increment Simulation SimCounter
+                this->SimCounter++;
 
                 //Move the particles
                 dynamics_cycle(this->SimCounter);
@@ -475,13 +478,9 @@ public:
 
     	config["Path"] =  this->box_path;//---------------->1
       config["raw_path"] = this->raw_path;
-    	config["Edge"] = this->Edge;//--------------------->2
-    	config["FrameExports"] = this->FrameExports;//----->3
-    	config["Radius"] = this->veff.radius;//------------>4
+    	
+      config["Edge"] = this->Edge;//--------------------->2
     	config["Part_no"] = this->Part_no;//--------------->5
-    	config["T_stepsMax"] = this->T_stepsMax;
-    	config["dt"] = this->dt;
-      config["D"] = partlist[0].D; //!!!
       config["dim"] = this->dim;
 
     	config["run_python"] = gl::run_python; //Specifies History → Unused [[unused]]
@@ -489,18 +488,18 @@ public:
     	config["show_py_plots"] = gl::show_py_plots;
 
 
-    	config["veff_radius"] = veff.radius;
-    	config["veff_sf"] = veff.sf;
+    	//veff
 
     	//Note that char types are not automatically converted to JSON strings, but to integer numbers. A conversion to a string must be specified explicitly (source: library docs)
-    	config["D_Sep"] = std::string(1, FCS_DSep);//---------------------->6
-      
+    	//MACROS
+      config["D_Sep"] = std::string(1, FCS_DSep);//---------------------->6
       config["Symmetric Box"] = bool(FCS_SYMMETRIC_BOX);
-      config["PBC"] = bool(FCS_ENABLE_PBC);
+      config["pbc"] = bool(FCS_ENABLE_PBC);
       config["Particle Tagging"] = bool(FCS_PART_TAGGING);
       config["Tagged Part ID"] = FCS_TAG_PARTID;
       config["Rnd Sampling"] =bool(FCS_RND_SAMPLING);
     	
+
     	//Open(Create) File
     	std::string filename = parentpath;
     	filename.append("config.json");
@@ -508,6 +507,7 @@ public:
     	
     	file << std::setw(4) << config; //Write to file with intendation ws = 4
     	file.close(); //Close file
+      
     } //End of JsonConfigWrite()
 
 
@@ -516,36 +516,47 @@ public:
     	
     	std::ostringstream buffer;
     	buffer << std::setprecision(FCS_FLOAT_SHORT_PRECISION) << std::boolalpha;
-    	buffer << " • BoxID: " << this->BoxID << " | Box Path: " << this->box_path << '\n';
+    	
+      buffer << " • BoxID: " << this->BoxID << " | Box Path: " << this->box_path << '\n';
     	buffer << " • First Seed used for MT PRNG: " << rnd.FirstSeed() << '\n';
 
-    	buffer << "\n————→  Box Parameters  ←————\n"; //BOX
+    	buffer << "\n\t\t————→  Box Parameters  ←————\n"; //BOX
     	buffer << " • Box Edge: "<< Edge << " | No. Density: " << Rho << " | Particles: " << Part_no;
-      buffer << "\n • Concentration: " << Rho*1e-6/(CONST_Avogadro*units.realVolumeFactor())<< " mol/cm3"
+      buffer << "\n • Concentration: " << Rho * 1e-6/(CONST_Avogadro * units.stor_volume())<< " mol/cm3"
              << " | • Box Volume: "<< this->Vol << '\n';
 
-    	buffer << "\n • Total Steps: " << T_stepsMax << " | Step Size: " << dt << '\n';
-    	buffer << " • Position Frame Export (Uniform): " << FrameExports << "/" << T_stepsMax << '\n';
-
     	//Declare if Symmetric Box and if Gaussian PSF
-    	buffer << " • Box Symmetric: " << (FCS_SYMMETRIC_BOX == 1) << " | PSF Type: "
-    		   << (FCS_VEFF_ELLIPSOID == 1 ? "Ellipsoid - 3D Gaussian" : "Uniform Spherical") << '\n';
+    	buffer << " • Box Symmetric: " << (FCS_SYMMETRIC_BOX == 1)
 
-      double femto_vol = veff.vol * units.realVolumeFactor() * 1e18;
-    	buffer << "\n————→  Veff Parameters  ←————\n"; //VEFF
-      buffer << " • Veff Volume/Box Volume: " << veff.vol/this->Vol << " | Real Vol: "<< femto_vol <<" fL \n";
-      buffer << " • Volume of Veff: " << veff.vol << " | Veff Radii(x,y,z): " << AD_Radius << '\n';
-    	buffer << " • xy-Radius: " << veff.radius << " | Structure Factor: " << veff.sf << "\n";
-    	buffer << " • PSF Exponents: " << PSF_exponent << " | PSF Normalization: " << PSF_norm << '\n';
+
+      //Iteration over the current - laser, veff, and detectorlist
+
+
+      double femto_vol = veff.get_vol() * units.stor_volume() * 1e18;
     	
-    	buffer << "\n————→  Laser Parameters  ←————\n"; //LASER
-      buffer << " • Laser Operation Mode: " << laser.mode << '\n';
-    	buffer << " • Pulsing Time Period: " << laser.getPulseTimePeriod() << " | Char Decay Time: " <<  laser.getCharDecayTime() << "\n\n";
+      buffer << "\n\t\t————→  Effective Volume  ←————\n"; //VEFF
+      buffer << " • Veff → " << veff.get_veff_type() << '\n';
+      buffer << " • Veff Volume/Box Volume: " << veff.get_vol()/this->Vol << " | Real Vol: "<< femto_vol <<" fL \n";
+      buffer << " • Volume of Veff: " << veff.get_vol() << " | Veff Radial Radius(x-y): " << veff.get_rad_radius() << '\n';
+    	buffer << " • z-Radius: " << veff.get_z_radius() << " | Structure Factor: " << veff.get_sf() << "\n";
+    	
+
+      buffer << "\n\t\t————→  Lasers  ←————\n";
+      for(unsigned int i = 0; i < laserlist.size(); i++)
+      {
+        buffer << i << ". " << laserlist.at(i).profile() << '\n';
+      }
+
+      buffer << "\n\t\t————→  Detectors  ←————\n";
+      for(unsigned int i = 0; i < detectorlist.size(); i++)
+      {
+        buffer << i << ". " << color::color_str(detectorlist.at(i).Color) << " Detector \n";
+      }
      
     	//---
-    	buffer << units.profile(dt, T_stepsMax) << '\n';
+    	buffer << units.profile() << '\n';
 
-      buffer << "\n————→ • • • ←————\n"; //LASER
+      buffer << "\n\t\t\t————→ • • • ←————\n";
 
     	return buffer.str();
 
@@ -607,10 +618,9 @@ public:
     } //End of SetSession()
 
 
-    void launch_py_analysis()
+    void launch_py_analysis() const
     {
         TimerHD time_for_plotting("Python Analysis");
-        
         
         std::ostringstream command;
         command << "python3  ./src/python/analysis.py" << "  " //-----> Script Name
@@ -621,6 +631,19 @@ public:
         time_for_plotting.Stop(); //Destroy object
     } //End of Launch_Python_Analysis()
 
+
+    /**
+     * Returns the accumulated *Mean Squared Displacement (MSD)* of all the particles in the particlelist. */
+    double inline calc_msd() const
+    {
+      double MSD = 0;
+      for(const auto &part : partlist)
+      {
+        MSD += part.get_init_displacement().size_sq();
+      }
+
+      return MSD/double(Part_no);
+    }
 
 }; //End of class LangevinBox[]
 
