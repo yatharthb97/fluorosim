@@ -34,7 +34,7 @@ using enum_int_t = std::uint_fast8_t; // Enum integer type
 #define FCS_VEFF_ELLIPSOID 1
 
 //4. Enabling would restrict particle flashing to the first ellipsoid (Airy Disc). Enable for Optimization.
-#define FCS_INVOL_CUTOFF 1 
+#define FCS_INVOL_CUTOFF 0
 
 //5. Enables the offsetting of the PSF from the centre position
 #define FCS_PSF_OFFSET 0

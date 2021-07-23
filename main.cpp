@@ -5,7 +5,7 @@
 int main()
 {
 	
-	Modes::SetModeCode(15); //Declare that the working mode is 15
+	Modes::SetModeCode(7); //Declare that the working mode is 15
 	
 	//0. Specify HomePath(that should exist) → Optional
 	HomePath("/mnt/m/code/FCS/Results/");
@@ -20,12 +20,12 @@ int main()
 	Laser laser("always-on"); //Pulse Every 10 dt, char decay time is 5 dt
 
 	//4. Create Veff Object → Veff(radius, structure_factor)
-	Veff veff(600.0, 1);
+	Veff veff(500.0, 2);
 
 	//5. Create Box Object → LangevinBox(Rho, Part_no, FrameExports, simclock, laser, veff)
 	int write_frames = 100;
-	double Rho = 1e-6;
-	int Part_no = 500;
+	double Rho = 1e-9;
+	int Part_no = 200;
 	
 	gl::do_pos_plots = true;
 

@@ -135,10 +135,10 @@ def plot_msd(t, msd, param, log=False, fit='none'):
         
         
         #arrow(x, y, dx, dy, **kwargs) → dx, dy: The length of the arrow along x & y
-        plt.arrow(t_saturate, 0, t_saturate, msd[int(t_saturate)], 
-                  head_width = 0.2,
-                  width = 0.05,
-                  ec ='green')
+        #plt.arrow(t_saturate, 0, t_saturate, msd[int(t_saturate)], 
+                  #head_width = 0.2,
+                  #width = 0.05,
+                  #ec ='green')
 
     #Plot Data
     ax.set_title(f'MSD Plot - Slope → {coef[0]}') #TODO - Restrict Precision

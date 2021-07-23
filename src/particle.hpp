@@ -13,7 +13,7 @@ public:
 	unsigned int partid;
 	V pos; 		         	    //Position Vector
   V init_pos;          	  //Initial Position
-	double D = 3.0;      	  //Diffusion Rate
+	double D = 500.0;      	  //Diffusion Rate
 	double qm_yield = 0.8; 	//Emmission base probablity
 	bool InVol = false;     // Is the particle in the observation Volume ?
 	

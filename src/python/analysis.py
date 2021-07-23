@@ -73,8 +73,10 @@ statfilename = os.path.join(parent_path, 'stats.dat');
 
 # if['stat_file_binary'] = False: TODO
 t, msd, invol, flash = np.loadtxt(statfilename, delimiter = param['D_Sep'], unpack = True)
-fewquencies(flash)
-fewquencies(flash)
+
+#fewquencies(flash)
+#fewquencies(flash)
+
 #PLOT(S) 1
 #Plot Dual Time Series of whole arrays
 plot_two_timeseries(invol, flash, "invol", "flash", "Count Plot", param)

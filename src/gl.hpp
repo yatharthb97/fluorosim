@@ -67,7 +67,7 @@ namespace gl
 		Modes::Declare("Symmetric Box", FCS_ENABLE_PBC); //2
 		Modes::Declare("Veff - Ellipsoid", FCS_VEFF_ELLIPSOID); //3
 		Modes::Declare("InVolume Cutoff Optimization", FCS_INVOL_CUTOFF); //4
-		Modes::Declare("Random Sample Test", FCS_RND_SAMPLING); //5
+		Modes::Declare("PSF Offset Enabled", FCS_PSF_OFFSET); //5
 		
 		
 		if(!Modes::AllClear())
