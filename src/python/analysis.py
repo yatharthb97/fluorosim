@@ -19,12 +19,10 @@ import json
 import datetime
 
 from plotlib import *
-
+from functools import partial
 
 #1 Setup
 plt.style.use('seaborn-darkgrid') #Set plot style
-
-
 #Receive environemt from args
 #ARG0 - Scriptname
 parent_path = sys.argv[1] #ParentPath
@@ -37,6 +35,7 @@ else:
 
 
 #Print Parent Path and Operation Mode
+sys.stdout.write(f"  ** Langsim Analysis Module **");
 sys.stdout.write(f"• Parent Path: {parent_path} | Operation Mode: {operation_mode}");
 
 
@@ -48,7 +47,6 @@ with open(jsonname) as json_file:
 
 
 #Add Local Parameters to the received parameter set
-param['parent_path'] = parent_path;
 param['bin_size'] = int(100) #For TimeSeries
 
 
@@ -72,18 +70,27 @@ tag_sample_size = 1000
 statfilename = os.path.join(parent_path, 'stats.dat');
 
 # if['stat_file_binary'] = False: TODO
-t, msd, invol, flash = np.loadtxt(statfilename, delimiter = param['D_Sep'], unpack = True)
-fewquencies(flash)
-fewquencies(flash)
-#PLOT(S) 1
-#Plot Dual Time Series of whole arrays
-plot_two_timeseries(invol, flash, "invol", "flash", "Count Plot", param)
+t, msd = np.loadtxt(param["stats_file"], delimiter = param['d_sep'], unpack = True)
+
+#Load Lasers
+lasers = json.loads(param["lasers_description"])
+
+#Load Detectors
+detectors = pd.read_csv(param["detectors_file"], sep=param["d_sep"])
 
 
-#PLOT(S) 2
-#plot_poisson_hist(data, bins, plot_title, param,  fit)
-#plot_poisson_hist(flash, 10, "Flash Poisson", param, False)
-#plot_poisson_hist(invol, 10, "InVol Poisson", param, False)
+#Partial functions
+cross_corr = partial(cross_correlation_graph, detectors = detectors, param = param)
+ttl = partial(detectors = detectors, param = param)
+
+
+
+
+
+
+
+
+
 
 
 #PLOT(S) 3

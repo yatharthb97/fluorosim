@@ -398,15 +398,17 @@ public:
                 MSD += (MSDi)/double(Part_no); //Total MSD count per particle
 
                                   //Simulation Time               //MSD
-                datapipe.stats << this->SimCounter << FCS_DSep << MSD/double(this->SimCounter);
+                datapipe.msd << this->SimCounter << FCS_DSep << MSD/double(this->SimCounter) << '\n';
                   
+
+                datapipe.detectors << this->SimCounter << FCS_DSep;
                 #pragma unroll  //Append Detector Counts to the datapipe      
                 for(auto &detector : detectorlist)
                 {
-                  datapipe.stats << FCS_DSep << detector.get_count();
+                  datapipe.detectors << detector.get_count() << FCS_DSep;
                 }
 
-                datapipe.stats << '\n';
+                datapipe.detectors << '\n';
 
               //Data Acqusition ------------------------  
 
@@ -471,34 +473,61 @@ public:
     void inline json_config(const std::string &parentpath, const simcounter_t current_time)
     {
     	
-    	// for convenience
-    	using json = nlohmann::json;
+    	using json = nlohmann::json;  // for convenience
 
     	json config; //Init Json Object
 
-    	config["Path"] =  this->box_path;//---------------->1
+    	config["parent_path"] =  this->box_path;
       config["raw_path"] = this->raw_path;
     	
-      config["Edge"] = this->Edge;//--------------------->2
-    	config["Part_no"] = this->Part_no;//--------------->5
+      config["Edge"] = this->Edge;
+    	config["Part_no"] = this->Part_no;
       config["dim"] = this->dim;
 
     	config["run_python"] = gl::run_python; //Specifies History → Unused [[unused]]
     	config["do_pos_plots"] = gl::do_pos_plots ;
-    	config["show_py_plots"] = gl::show_py_plots;
+    	config["show_plots"] = gl::show_py_plots;
 
+
+
+      //Detectors
+      for(const auto &det: detectorlist)
+      {
+        config["detectors_description"] << det.profile();
+      }
+
+      //Lasers
+      for(const auto &laser: laserlist)
+      {
+        config["lasers_description"] << lasers.profile();
+      }
+
+
+ 
 
     	//veff
 
     	//Note that char types are not automatically converted to JSON strings, but to integer numbers. A conversion to a string must be specified explicitly (source: library docs)
     	//MACROS
-      config["D_Sep"] = std::string(1, FCS_DSep);//---------------------->6
       config["Symmetric Box"] = bool(FCS_SYMMETRIC_BOX);
-      config["pbc"] = bool(FCS_ENABLE_PBC);
-      config["Particle Tagging"] = bool(FCS_PART_TAGGING);
-      config["Tagged Part ID"] = FCS_TAG_PARTID;
-      config["Rnd Sampling"] =bool(FCS_RND_SAMPLING);
     	
+
+
+
+      // ---- MACROS -------------------------------
+
+      config["d_sep"] = std::string(1, FCS_DSep);//---------------------->6
+      config["pbc"] = bool(FCS_ENABLE_PBC);
+ 
+      config["part_tagging"] = bool(FCS_PART_TAGGING);
+      config["prng_sampling"] =bool(FCS_RND_SAMPLING);
+      //Particle Tagging (if enabled)
+      #if FCS_PART_TAGGING == 1
+        config["tagged_partid"] = unsigned int(FCS_TAG_PARTID);
+      #else
+        config["tagged_partid"] = "No Particle Tagged!";
+      #endif
+
 
     	//Open(Create) File
     	std::string filename = parentpath;

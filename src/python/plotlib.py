@@ -238,50 +238,31 @@ def plot_timeseries(time_series, plot_title, param):
   if param['show_py_plots']:
     plt.show()
 
-def plot_two_timeseries(data1, data2, label1, label2, plot_title, param):
-  
-  fig, ax = plt.subplots()
-  tx = np.arange(max(np.size(data1), np.size(data2)))
-  
-  ax.set_title(plot_title)
-  ax.plot(tx, data1, '-', label = label1)
-  ax.plot(tx, data2, '-', label = label2)
-  
-  
-  y_max = max(data1.max(), data2.max())
 
 
-  plt.legend()
-  ax.set_yticks(np.arange(0, y_max))
-  ax.set_xlabel('time →')
-  ax.set_ylabel('Count →')
-  
-  #3.4 Save Plot
-  figname = os.path.join(param['parent_path'], f'{plot_title}.png')
-  plt.savefig(figname)
-
-  # 3.5 Open Live Plot
-  if param['show_py_plots'] == True:
-    plt.show()
 
 
-#6.1 Particle Tagging Function Defination
+### Updated beyond this point
+
+
 def plot_taggedpart(sample_size, param):
-
+  ''' This function producs Brownian plots for a given particle. '''
+  print(f" • Generating →  Tagged Particle Brownian Plot - Particle ID: {param[tagged_partid]}")
+  
   filename = os.path.join(param['parent_path'], 'tag.dat');
   x, y, z = np.genfromtxt(filename, delimiter = param['D_Sep'], unpack = True, 
                           max_rows=sample_size)
 
   if sample_size > np.size(x):
     sample_size = np.size(x)
-    print(f"[ERROR] Sample Size Shortage. Actual Size → {sample_size}")
+    print(f" • Error →  Sample Size Shortage. Actual Size → {sample_size}")
 
   color = np.arange(sample_size)
 
   ax3d = plt.subplot(projection='3d')
-  ax3d.set_title(f"Tagged Particle PID: {int(param['Tagged Part ID'])} - Steps → 0:{sample_size}")
+  ax3d.set_title(f"Tagged Particle ID: {int(param['Tagged Part ID'])} → Time Steps — 0 to {sample_size}")
 
-  #Adjust Limits Based on min and max position Components → In Isometric Space
+  #Adjust Limits Based on min and max position Components → To make Isometric Space
   x_r = [x.min(), x.max()]
   y_r = [y.min(), y.max()]
   z_r = [z.min(), z.max()]
@@ -304,7 +285,8 @@ def plot_taggedpart(sample_size, param):
 
   ax3d.view_init(25, 10)
 
-  #Order of magnitude scaling for Point Size : 10 → 0.4 100 → 0.3, 1000 point → 0.2
+  #Order of magnitude scaling for Point Size : 10 → 0.4 100 → 0.3, 1000 point → 0.2 
+  #(Might break for very large samples.) ↓
   point_size = (math.log10(sample_size) - 1.0)/10
   print(point_size)
 
@@ -316,12 +298,13 @@ def plot_taggedpart(sample_size, param):
   savefigname = os.path.join(parent_path, f"tagged_pid{param['Tagged Part ID']}.png")
   plt.savefig(savefigname)
 
-  if show:
+  if param['show_plots']:
     plt.show()
 
 
-# Sampling Plot
+
 def plot_rndsample_hist(bins, param):
+  ''' Produces histograms for the PRNG "random" number samples. This plot is meant to check biases in the random number generators. '''
   filename = os.path.join(param['parent_path'], 'u_dist.dat');
   uniform = np.genfromtxt(filename, unpack = True)
 
@@ -332,23 +315,23 @@ def plot_rndsample_hist(bins, param):
   # Creating plot → Gaussian Sample
   fig = plt.figure()
   plt.hist(gauss, bins=bins)
-  plt.title('Random Sample → Gaussian')
+  plt.title(f'Random Sample Histogram {bins} bins → Gaussian')
 
-  savefigname = os.path.join(parent_path, 'gauss.png')
+  savefigname = os.path.join(parent_path, 'prngsample_gauss_dist.png')
   plt.savefig(savefigname)
 
-  if param['show_py_plots']:
+  if param['show_plots']:
     plt.show()
 
 
   fig = plt.figure()
   plt.hist(uniform, bins=bins)
-  plt.title('Random Sample → Uniform')
+  plt.title(f'Random Sample Histogram {bins} bins → Uniform')
 
-  savefigname = os.path.join(parent_path, 'u_dist.png')
+  savefigname = os.path.join(parent_path, 'prngsample_u_dist.png')
   plt.savefig(savefigname)
 
-  if param['show_py_plots']:
+  if param['show_plots']:
     plt.show()
 
 #Plot Position Animation
@@ -459,9 +442,83 @@ def pos_plot_animation(param, save_vid=False, psf_alpha=0.25, draw_psf=True):
       print("••••• Rendering Plot animation ends...")
 
 
+def plot_cross_corr(det1, det2, detectors param):
 
-def bin_tseries(t_series, bin_size):
-  binned_ts = np.copy(t_series) #Make a Copy of flash
-  binned_ts = np.reshape(binned_ts, newshape=(int(np.size(t_series)/bin_size), bin_size))
-  binned_ts = np.sum(binned_ts, axis=1) #Sum along the row
-  return binned_ts
+  ''' For two detectors, it plots the cross correlation graph. '''
+  if: not(det1 <= detectors.columns and det2 <=detectors.columns)
+    prinf(f" • Detector index out of range.")
+    return 
+
+  print(f" • Generating → Cross Correlation Plot - Intensity - Detector {det1} & {det2}")
+  fig, ax = plt.subplots()
+  ax.set_title(f" Cross Correlation Plot - Intensity - Detector {det1} & {det2}")
+  ax.set_xlabel(f"{param['detectors_description'][det1]}")
+  ax.set_ylabel(f"{param['detectors_description'][det2]}")
+
+  ax.pcolormesh([detectors[det1], detectors[det2]], c = float(detectors[det2])/float(detectors[det1]))
+
+  savename = os.path.join(param['parent_path'], f"cross_corr_{det1}_{det2}.png")
+  plt.savefig(savename)
+
+  if param["show_plots"]:
+    plt.show()
+
+
+def plot_ttl(detectors, param):
+
+  ''' Plots the ttl pulses for all the detectors in one plot.'''
+
+  #Subplot grid - Each detector gets its own subplot
+  fig,axes = plt.subplots(detectors.colums)
+  time = np.arange(0, detectors[0].size())
+  
+  for i in range (0, detectors.colums):
+      axes[i].set_title(f"{param['detectors_description'][i]}")
+      axes[i].plot(time, detectors[i])
+
+  for ax in axes:
+    ax.set(xlabel='Intensity →', ylabel='Time →')
+
+  savename = os.path.join(param['parent_path'], "ttl.png")
+  plt.savefig(savename)
+
+  if param["show_plots"]:
+    plt.show()
+
+
+  #Each detector is plotted on one single plot.
+  fig, ax = plt.subplots()
+  
+  ax.set_xlabel('Time →')
+  ax.set_ylabel('Intensity →')
+
+  for i in range(detectors.colums):
+    ax.plot(time, detectors[i], '-', alpha = 0.5, label = param['detectors_description'][i])
+
+
+  savefilename = os.path.join(param['parent_path'], "ttl_combined.png")
+  plt.savefig(savefilename)
+
+  if param["show_plots"]:
+    plt.show()
+
+
+  #Individual Plot with max and mean analysis
+  for i in range(detectors.colums):
+    
+    det_max = detector[i].max()
+    det_min = detector[i].mean()
+
+    fig, ax = plt.subplots()
+    ax.set_title(param['detectors_description'][i])
+    ax.plot(time, detector[i])
+    ax.hlines(det_max, '-', label = ' max', color = "red")
+    ax.hlines(det_mean, '-', label = ' mean', color  = "lightgreen")
+
+
+    ax.set_xlabel('time(t) →')
+    ax.set_ylabel('Count →')
+
+    savefigname = os.path.join(param['parent_path'], f'detector_{i}.png')
+    plt.savefig(savefigname)
+
