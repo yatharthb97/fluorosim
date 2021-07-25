@@ -55,8 +55,6 @@ using enum_int_t = std::uint_fast8_t; // Enum integer type
 
 //-----> Extra Features → Yet to be implemented
 
-// Allow Bleaching Mode
-#define FCS_BLEACHING 0
 
 
 

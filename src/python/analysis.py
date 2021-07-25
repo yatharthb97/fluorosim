@@ -148,7 +148,7 @@ else:
 
 
 if param['do_pos_plots'] == True: #Pos Plot Animation Function
-  pos_plot_animation(param,save_vid=False, psf_alpha=psf_alpha, draw_psf=True)
+  pos_plot_animation(param,save_vid=True, psf_alpha=psf_alpha, draw_psf=True)
 
 else:
   print(f"-> Positon Plots are disabled.")

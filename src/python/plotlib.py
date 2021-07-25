@@ -431,7 +431,7 @@ def pos_plot_animation(param, save_vid=False, psf_alpha=0.25, draw_psf=True):
       ax3d.set_zlabel('Z')
 
       if draw_psf:
-        ax3d.plot_surface(xg, yg, zg, linewidth=0.0, cstride=1, rstride=1, alpha=psf_alpha, color='yellow')
+        ax3d.plot_surface(xg, yg, zg, linewidth=0.0, cstride=1, rstride=1, alpha=psf_alpha, color='blue')
 
       ax3d.scatter3D(xdata, ydata, zdata, c=cdata)
     ##################################### End of graph_update()

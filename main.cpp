@@ -14,7 +14,7 @@ int main()
 	NewSession("Test", "singlebox");
 
 	//2. Create Simulation Clock Object → SimClock(MaxSteps, Step_Size)
-	SimClock simclock(1e5, 1e-3);
+	SimClock simclock(1e7, 1e-3);
 
 	//3. Create Laser Object → (pulse interval, char, decy time)
 	Laser laser("always-on"); //Pulse Every 10 dt, char decay time is 5 dt
@@ -23,9 +23,9 @@ int main()
 	Veff veff(500.0, 2);
 
 	//5. Create Box Object → LangevinBox(Rho, Part_no, FrameExports, simclock, laser, veff)
-	int write_frames = 100;
+	int write_frames = 1000;
 	double Rho = 1e-9;
-	int Part_no = 200;
+	int Part_no = 100;
 	
 	gl::do_pos_plots = true;
 
