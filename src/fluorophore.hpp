@@ -35,6 +35,8 @@ public:
 
   simcounter_t Last_emit = 0; //! Simulaton Counter of last emission → It is the temporal state-specifier and a memory variable of the fluorophore. It can answer questions like - When did this fl last emmit a photon? or For a given time t, has there been an emission which is simply the result of (t == Last_emit).
 
+  //Stores the signals of the fluorophores
+  SignalSpace<color_t, static_cast<unsigned int>(color_t::Max)> signals;
 
 //Methods
 

@@ -252,3 +252,9 @@ public:
 
 
 }; // End of class EvenLaser
+
+
+std::cout << "print" << var << 
+dsds;
+
+std::cin >> var;

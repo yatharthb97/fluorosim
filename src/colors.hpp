@@ -2,13 +2,13 @@
 
 // Header file defining colors
 
-enum class color_t
+enum class color_t : uint8_t
 {
 	colorless = 0,
 	all = colorless,
-	red,
-	green,
-	yellow
+	red = 1,
+	green = 2,
+	yellow = 3
 
 };
 
@@ -22,3 +22,12 @@ namespace color
 		return color::Color_names[static_cast<unsigned int>(color)];
 	}
 };
+
+
+
+
+
+
+//constexpr MaxSig = static_cast<unsigned int>(signal::Max);
+
+

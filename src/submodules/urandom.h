@@ -68,9 +68,9 @@ public:
 		}
 	}
 
-	bool inline Open()
+	bool inline open()
 	{
-		fd = open("/dev/urandom", O_RDONLY, O_NONBLOCK); //Non-blocking mode implemented
+		fd = open("/dev/urandom", O_RDONLY, O_NONBLOCK); //Read only, Non-blocking
 
 		if (fd != -1)
 		{
@@ -87,8 +87,6 @@ public:
 		return open_flag;
 	}
 
-
-
 	void inline Close()
 	{
 		open_flag = false;
@@ -96,13 +94,13 @@ public:
 		close(fd);
 	}
 
-	template <typename T>
-	T inline get()
+	template <typename TypeName>
+	TypeName inline Get() __attribute__((always-inline))
 	{
 		if(open_flag)
 		{
-			T read_value;
-			ssize_t r = read(fd, &read_value, sizeof(T));
+			T read_value; //Initialize Garbage Explicitly
+			ssize_t read_status = read(fd, &read_value, sizeof(TypeName));
 			return read_value;
 		}
 

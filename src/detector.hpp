@@ -4,20 +4,20 @@
 
 //Header file for Detector class
 
-template <class channel_t>
+template <class signal_t>
 class Detector
 {
 public:
-	channel_t Channel; //! The specific detection channel for the detector.
+	signal_t Signal; //! The specific detection channel for the detector.
 	double Efficiency = 1.0; //! The detection efficiency of the detector.
-  counter_t Detected_count = 0; //! The shots counted by the detector.
+  	counter_t Detected_count = 0; //! The shots counted by the detector.
 
 
 	//0
 	/**
 	 * @brief The constructor.
 	 * */
-	Detector(channel_t Channel, double Efficiency = 1.0): Channel(Channel), Efficiency(Efficiency)
+	Detector(signal_t Signal, double Efficiency = 1.0): Signal(Signal), Efficiency(Efficiency)
 	{}
 
 
@@ -25,9 +25,9 @@ public:
 	/**
 	 * @brief Function that couples the detector to the detectable based on the channel_t.
 	 * */
-	bool inline filter(channel_t channel)
+	bool inline filter(signal_t signal)
 	{
-		return (channel == this->Channel);
+		return (signal == this->Signal);
 	}
 
 
@@ -35,10 +35,9 @@ public:
 	/**
 	 * @brief Store the detected ttl pulse/shots.
 	 * */
-	void inline detect(const unsigned int ttl, bin_detect_t &detectable)
+	void inline detect(const unsigned int emittance)
 	{
-	  this->Detected_count += ttl;
-	  detectable = (ttl > 0) || false; //Switch detectable as per the condition
+	  this->Detected_count += emittance;
 	}
 
 	//3
@@ -56,7 +55,7 @@ public:
 	 * */
 	counter_t inline approx_missed() const
 	{
-	  return Detected_count * static_cast<counter_t>(1.0 - Efficiency);
+	  return counter_t(Detected_count * (1.0 - Efficiency));
 	}
 
 	//5
@@ -79,6 +78,28 @@ public:
 	  return (unirnd() <= this->Efficiency);
 	}
 
+};
+
+/** @brief Describes a bookeeping object that tracks the various types of signals emitted within a system. */
+template <class signal_t, unsigned int Max_signals>
+class SignalSpace
+{
+public:
+	unsigned int signals[Max_signals] = {0}; //! Stores the emit count (emittance) of the different signals in the signal space.
+	
+	/** @brief Increments the emitance of a particular signal type. */
+	void emit(signal_t signal)
+	{
+		signals[static_cast<unsigned int>(signal)]++;
+	}
+
+	/** @brief Pops the passed signal type from the signal struct. */
+	unsigned int detect(sig_t signal)
+	{
+		unsigned int tmp = signals[static_cast<unsigned int>(signal)];
+		signals[static_cast<unsigned int>(signal)] = 0;
+		return temp;
+	}
 };
 
 

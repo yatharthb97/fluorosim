@@ -3,7 +3,7 @@
 //Type declration header
 
 
-typedef unsigned long int counter_t;
+typedef uint64_t counter_t;
 
 typedef unsigned long int simcounter_t;
 
@@ -38,3 +38,4 @@ class B : public A
 {
 	//Implements methods A and B.
 };
+
